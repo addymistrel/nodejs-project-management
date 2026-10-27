@@ -7,5 +7,9 @@
   "files.insertFinalNewline": true,
   "eslint.validate": ["javascript", "typescript"],
   "eslint.run": "onSave",
-  "prettier.requireConfig": true
+  "prettier.requireConfig": true,
+  "js/ts.suggest.autoImports": true,
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "js/ts.preferences.importModuleSpecifierEnding": "minimal",
+  "js/ts.updateImportsOnFileMove.enabled": "always"
 }

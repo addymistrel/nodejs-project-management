@@ -1,0 +1,46 @@
+const JOB_TYPES = {
+  ZIP_COMPRESSION: 'ZIP_COMPRESSION',
+} as const;
+
+const JOB_STATUSES = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+} as const;
+
+const JOB_TYPE_VALUES = Object.values(JOB_TYPES);
+const JOB_STATUS_VALUES = Object.values(JOB_STATUSES);
+
+const JOB_SCHEMA_CONST = {
+  TABLE_NAME: 'jobs',
+  MODEL_NAME: 'Job',
+  ATTRIBUTES: {
+    PROJECT_ID: 'projectId',
+    OUTPUT_FILE_ID: 'outputFileId',
+  },
+  FIELDS: {
+    ID: 'id',
+    PROJECT_ID: 'project_id',
+    TYPE: 'type',
+    STATUS: 'status',
+    PROGRESS: 'progress',
+    OUTPUT_FILE_ID: 'output_file_id',
+    ERROR_MESSAGE: 'error_message',
+    STARTED_AT: 'started_at',
+    COMPLETED_AT: 'completed_at',
+    CREATED_AT: 'created_at',
+    UPDATED_AT: 'updated_at',
+  },
+  RELATIONS: {
+    PROJECT: 'project',
+    OUTPUT_FILE: 'outputFile',
+  },
+  INDEXES: {
+    PROJECT_ID: 'jobs_project_id_idx',
+    STATUS: 'jobs_status_idx',
+    PROJECT_STATUS: 'jobs_project_status_idx',
+  },
+};
+
+export { JOB_SCHEMA_CONST, JOB_STATUSES, JOB_STATUS_VALUES, JOB_TYPES, JOB_TYPE_VALUES };
