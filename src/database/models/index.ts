@@ -1,3 +1,5 @@
-export { FileModel } from '#/database/models/file-model.js';
-export { JobModel } from '#/database/models/job-model.js';
-export { ProjectModel } from '#/database/models/project-model.js';
+import { FileModel } from '#/database/models/file-model';
+import { JobModel } from '#/database/models/job-model';
+import { ProjectModel } from '#/database/models/project-model';
+
+export { FileModel, JobModel, ProjectModel };

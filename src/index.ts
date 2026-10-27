@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { initializeModelRelations } from '#/database/model-relations.js';
+import { initializeModelRelations } from '#/database';
 
 const app = express();
 const port = Number(process.env.PORT ?? 3000);

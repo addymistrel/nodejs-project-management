@@ -8,7 +8,14 @@ export default defineConfig(
   ...tseslint.configs.recommended,
   prettier,
   {
-    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'uploads/**', 'outputs/**'],
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      'coverage/**',
+      'uploads/**',
+      'outputs/**',
+      '.sequelizerc',
+    ],
   },
   {
     files: ['src/**/*.ts'],
@@ -31,6 +38,14 @@ export default defineConfig(
           varsIgnorePattern: '^_',
         },
       ],
+    },
+  },
+  {
+    files: ['sequelize.config.js', '.sequelizerc'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+      },
     },
   },
 );

@@ -20,12 +20,17 @@ const JOB_SCHEMA_CONST = {
     OUTPUT_FILE_ID: 'outputFileId',
   },
   FIELDS: {
+    ID: 'id',
     PROJECT_ID: 'project_id',
+    TYPE: 'type',
     STATUS: 'status',
+    PROGRESS: 'progress',
     OUTPUT_FILE_ID: 'output_file_id',
     ERROR_MESSAGE: 'error_message',
     STARTED_AT: 'started_at',
     COMPLETED_AT: 'completed_at',
+    CREATED_AT: 'created_at',
+    UPDATED_AT: 'updated_at',
   },
   RELATIONS: {
     PROJECT: 'project',

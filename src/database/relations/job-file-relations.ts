@@ -1,9 +1,7 @@
-import { FILE_SCHEMA_CONST } from '#/constants/file-constants.js';
-import { JOB_SCHEMA_CONST } from '#/constants/job-constants.js';
-import { FileModel } from '#/database/models/file-model.js';
-import { JobModel } from '#/database/models/job-model.js';
+import { FILE_SCHEMA_CONST, JOB_SCHEMA_CONST } from '#/constants';
+import { FileModel, JobModel } from '#/database/models';
 
-export function initializeJobFileRelations(): void {
+function initializeJobFileRelations(): void {
   JobModel.belongsTo(FileModel, {
     foreignKey: JOB_SCHEMA_CONST.ATTRIBUTES.OUTPUT_FILE_ID,
     as: JOB_SCHEMA_CONST.RELATIONS.OUTPUT_FILE,
@@ -15,3 +13,5 @@ export function initializeJobFileRelations(): void {
     as: FILE_SCHEMA_CONST.RELATIONS.OUTPUT_JOBS,
   });
 }
+
+export { initializeJobFileRelations };

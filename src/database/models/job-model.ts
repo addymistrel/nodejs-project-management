@@ -1,16 +1,29 @@
 import { DataTypes, Model } from 'sequelize';
-
 import {
   JOB_SCHEMA_CONST,
   JOB_STATUS_VALUES,
   JOB_STATUSES,
   JOB_TYPE_VALUES,
   JOB_TYPES,
-} from '#/constants/job-constants.js';
-import { databaseClient } from '#/database/database-client.js';
-import type { JobStatus, JobType } from '#/types/job-types.js';
+} from '#/constants';
+import { databaseClient } from '#/database';
+import type { JobStatus, JobType } from '#/types';
 
-export class JobModel extends Model {
+interface JobAttributes {
+  id: number;
+  projectId: number;
+  type: JobType;
+  status: JobStatus;
+  progress: number;
+  outputFileId: number | null;
+  errorMessage: string | null;
+  startedAt: Date | null;
+  completedAt: Date | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+class JobModel extends Model implements JobAttributes {
   declare id: number;
   declare projectId: number;
   declare type: JobType;
@@ -98,3 +111,5 @@ JobModel.init(
     ],
   },
 );
+
+export { JobModel, JobAttributes };

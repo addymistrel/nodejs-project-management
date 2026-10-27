@@ -6,10 +6,16 @@ const FILE_SCHEMA_CONST = {
     OUTPUT_FILE_ID: 'outputFileId',
   },
   FIELDS: {
+    ID: 'id',
     PROJECT_ID: 'project_id',
+    NAME: 'name',
     STORAGE_PATH: 'storage_path',
+    SIZE: 'size',
     MIME_TYPE: 'mime_type',
+    CHECKSUM: 'checksum',
     IS_OUTPUT: 'is_output',
+    CREATED_AT: 'created_at',
+    UPDATED_AT: 'updated_at',
   },
   RELATIONS: {
     PROJECT: 'project',

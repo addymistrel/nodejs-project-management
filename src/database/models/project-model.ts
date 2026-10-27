@@ -1,9 +1,16 @@
 import { DataTypes, Model } from 'sequelize';
+import { databaseClient } from '#/database';
+import { PROJECT_SCHEMA_CONST } from '#/constants';
 
-import { PROJECT_SCHEMA_CONST } from '#/constants/project-constants.js';
-import { databaseClient } from '#/database/database-client.js';
+interface ProjectAttributes {
+  id: number;
+  name: string;
+  description: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
-export class ProjectModel extends Model {
+class ProjectModel extends Model implements ProjectAttributes {
   declare id: number;
   declare name: string;
   declare description: string | null;
@@ -39,3 +46,5 @@ ProjectModel.init(
     timestamps: true,
   },
 );
+
+export { ProjectModel, ProjectAttributes };

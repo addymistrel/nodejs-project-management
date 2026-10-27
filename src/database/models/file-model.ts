@@ -1,9 +1,21 @@
 import { DataTypes, Model } from 'sequelize';
+import { databaseClient } from '#/database';
+import { FILE_SCHEMA_CONST } from '#/constants';
 
-import { FILE_SCHEMA_CONST } from '#/constants/file-constants.js';
-import { databaseClient } from '#/database/database-client.js';
+interface FileAttributes {
+  id: number;
+  projectId: number;
+  name: string;
+  storagePath: string;
+  size: number;
+  mimeType: string;
+  checksum: string | null;
+  isOutput: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
-export class FileModel extends Model {
+class FileModel extends Model implements FileAttributes {
   declare id: number;
   declare projectId: number;
   declare name: string;
@@ -74,3 +86,5 @@ FileModel.init(
     ],
   },
 );
+
+export { FileModel, FileAttributes };

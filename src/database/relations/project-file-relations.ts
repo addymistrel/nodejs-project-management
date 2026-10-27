@@ -1,9 +1,7 @@
-import { FILE_SCHEMA_CONST } from '#/constants/file-constants.js';
-import { PROJECT_SCHEMA_CONST } from '#/constants/project-constants.js';
-import { FileModel } from '#/database/models/file-model.js';
-import { ProjectModel } from '#/database/models/project-model.js';
+import { FILE_SCHEMA_CONST, PROJECT_SCHEMA_CONST } from '#/constants';
+import { FileModel, ProjectModel } from '#/database/models';
 
-export function initializeProjectFileRelations(): void {
+function initializeProjectFileRelations(): void {
   ProjectModel.hasMany(FileModel, {
     foreignKey: FILE_SCHEMA_CONST.ATTRIBUTES.PROJECT_ID,
     as: PROJECT_SCHEMA_CONST.RELATIONS.FILES,
@@ -16,3 +14,5 @@ export function initializeProjectFileRelations(): void {
     as: FILE_SCHEMA_CONST.RELATIONS.PROJECT,
   });
 }
+
+export { initializeProjectFileRelations };

@@ -7,7 +7,9 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL is not configured');
 }
 
-export const databaseConfig = {
+const databaseConfig = {
   url: databaseUrl,
   logging: NODE_ENV === 'development' ? console.log : false,
 };
+
+export { databaseConfig };

@@ -1,9 +1,7 @@
-import { JOB_SCHEMA_CONST } from '#/constants/job-constants.js';
-import { PROJECT_SCHEMA_CONST } from '#/constants/project-constants.js';
-import { JobModel } from '#/database/models/job-model.js';
-import { ProjectModel } from '#/database/models/project-model.js';
+import { JOB_SCHEMA_CONST, PROJECT_SCHEMA_CONST } from '#/constants';
+import { JobModel, ProjectModel } from '#/database/models';
 
-export function initializeProjectJobRelations(): void {
+function initializeProjectJobRelations(): void {
   ProjectModel.hasMany(JobModel, {
     foreignKey: JOB_SCHEMA_CONST.ATTRIBUTES.PROJECT_ID,
     as: PROJECT_SCHEMA_CONST.RELATIONS.JOBS,
@@ -16,3 +14,5 @@ export function initializeProjectJobRelations(): void {
     as: JOB_SCHEMA_CONST.RELATIONS.PROJECT,
   });
 }
+
+export { initializeProjectJobRelations };

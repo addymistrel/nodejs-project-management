@@ -1,4 +1,4 @@
-import type { JOB_STATUSES, JOB_TYPES } from '#/constants/job-constants.js';
+import type { JOB_STATUSES, JOB_TYPES } from '#/constants';
 
 type JobType = (typeof JOB_TYPES)[keyof typeof JOB_TYPES];
 type JobStatus = (typeof JOB_STATUSES)[keyof typeof JOB_STATUSES];

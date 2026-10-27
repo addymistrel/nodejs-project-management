@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { databaseConfig } from '#/config/database-config';
+import { databaseConfig } from '#/config';
 
 const databaseClient = new Sequelize(databaseConfig.url, {
   dialect: 'postgres',
