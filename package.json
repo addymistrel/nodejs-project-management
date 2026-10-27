@@ -25,9 +25,9 @@
   "type": "module",
   "imports": {
     "#/*": {
-      "types": "./src/*",
-      "development": "./src/*",
-      "default": "./dist/*"
+      "development": "./src/*.ts",
+      "types": "./src/*.ts",
+      "default": "./dist/*.js"
     }
   },
   "bugs": {
