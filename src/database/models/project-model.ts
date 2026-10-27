@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 
+import { PROJECT_SCHEMA_CONST } from '#/constants/project-constants.js';
 import { databaseClient } from '#/database/database-client.js';
-import { PROJECT_SCHEMA_CONST } from '#/constants/project-constants';
 
 export class ProjectModel extends Model {
   declare id: number;

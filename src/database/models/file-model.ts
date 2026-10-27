@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 
-import { databaseClient } from '#/database/database-client';
-import { FILE_SCHEMA_CONST } from '#/constants/file-constants';
+import { FILE_SCHEMA_CONST } from '#/constants/file-constants.js';
+import { databaseClient } from '#/database/database-client.js';
 
 export class FileModel extends Model {
   declare id: number;

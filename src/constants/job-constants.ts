@@ -15,6 +15,10 @@ const JOB_STATUS_VALUES = Object.values(JOB_STATUSES);
 const JOB_SCHEMA_CONST = {
   TABLE_NAME: 'jobs',
   MODEL_NAME: 'Job',
+  ATTRIBUTES: {
+    PROJECT_ID: 'projectId',
+    OUTPUT_FILE_ID: 'outputFileId',
+  },
   FIELDS: {
     PROJECT_ID: 'project_id',
     STATUS: 'status',
@@ -22,6 +26,10 @@ const JOB_SCHEMA_CONST = {
     ERROR_MESSAGE: 'error_message',
     STARTED_AT: 'started_at',
     COMPLETED_AT: 'completed_at',
+  },
+  RELATIONS: {
+    PROJECT: 'project',
+    OUTPUT_FILE: 'outputFile',
   },
   INDEXES: {
     PROJECT_ID: 'jobs_project_id_idx',
