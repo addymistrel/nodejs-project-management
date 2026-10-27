@@ -27,10 +27,45 @@
   "license": "ISC",
   "type": "module",
   "imports": {
+    "#/config": {
+      "development": "./src/config/index.ts",
+      "types": "./src/config/index.ts",
+      "default": "./dist/config/index.js"
+    },
+    "#/constants": {
+      "development": "./src/constants/index.ts",
+      "types": "./src/constants/index.ts",
+      "default": "./dist/constants/index.js"
+    },
+    "#/database": {
+      "development": "./src/database/index.ts",
+      "types": "./src/database/index.ts",
+      "default": "./dist/database/index.js"
+    },
+    "#/database/relations": {
+      "development": "./src/database/relations/index.ts",
+      "types": "./src/database/relations/index.ts",
+      "default": "./dist/database/relations/index.js"
+    },
+    "#/database/models": {
+      "development": "./src/database/models/index.ts",
+      "types": "./src/database/models/index.ts",
+      "default": "./dist/database/models/index.js"
+    },
+    "#/types": {
+      "development": "./src/types/index.ts",
+      "types": "./src/types/index.ts",
+      "default": "./dist/types/index.js"
+    },
+    "#/utils": {
+      "development": "./src/utils/index.ts",
+      "types": "./src/utils/index.ts",
+      "default": "./dist/utils/index.js"
+    },
     "#/*": {
-      "development": "./src/*.ts",
-      "types": "./src/*.ts",
-      "default": "./dist/*.js"
+      "development": "./src/*",
+      "types": "./src/*",
+      "default": "./dist/*"
     }
   },
   "bugs": {

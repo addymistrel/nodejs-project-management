@@ -1,12 +1,4 @@
-import { connectToDatabase, databaseClient } from '#/database/database-client';
-import { initializeModelRelations } from '#/database/model-relations';
-import { FileModel, JobModel, ProjectModel } from '#/database/models';
+import { connectToDatabase, databaseClient } from '#/database/database-client.js';
+import { initializeModelRelations } from '#/database/model-relations.js';
 
-export {
-  databaseClient,
-  connectToDatabase,
-  initializeModelRelations,
-  FileModel,
-  JobModel,
-  ProjectModel,
-};
+export { databaseClient, connectToDatabase, initializeModelRelations };

@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { initializeModelRelations } from '#/database';
+import { logger } from '#/utils';
 
 const app = express();
 const port = Number(process.env.PORT ?? 3000);
@@ -14,5 +15,5 @@ app.get('/health', (_request, response) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  logger.info(`Server listening on port ${port}`);
 });

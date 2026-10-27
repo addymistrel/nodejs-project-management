@@ -11,8 +11,8 @@ interface FileAttributes {
   mimeType: string;
   checksum: string | null;
   isOutput: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 class FileModel extends Model implements FileAttributes {
@@ -87,4 +87,5 @@ FileModel.init(
   },
 );
 
-export { FileModel, FileAttributes };
+export { FileModel };
+export type { FileAttributes };

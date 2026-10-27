@@ -19,8 +19,8 @@ interface JobAttributes {
   errorMessage: string | null;
   startedAt: Date | null;
   completedAt: Date | null;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 class JobModel extends Model implements JobAttributes {
@@ -112,4 +112,5 @@ JobModel.init(
   },
 );
 
-export { JobModel, JobAttributes };
+export { JobModel };
+export type { JobAttributes };

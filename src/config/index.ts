@@ -1,3 +1,3 @@
-import { databaseConfig } from '#/config/database-config';
+import { databaseConfig } from '#/config/database-config.js';
 
 export { databaseConfig };
