@@ -1,7 +1,8 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { SequelizeStorage, Umzug } from 'umzug';
-import { databaseClient } from '#/database/database-client';
+import { databaseClient } from '#/database/database-client.js';
+import { logger } from '#/utils';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const migrationGlob = path.join(currentDirectory, 'migrations/*.ts').replaceAll('\\', '/');
@@ -12,7 +13,7 @@ const migrationRunner = new Umzug({
   },
   context: databaseClient.getQueryInterface(),
   storage: new SequelizeStorage({ sequelize: databaseClient }),
-  logger: console,
+  logger,
 });
 
 async function runMigrationCommand(command: string): Promise<void> {
@@ -38,7 +39,7 @@ const command = process.argv[2] ?? 'up';
 
 runMigrationCommand(command)
   .catch((error: unknown) => {
-    console.error('Migration command failed', error);
+    logger.error('Migration command failed', error);
     process.exitCode = 1;
   })
   .finally(async () => {

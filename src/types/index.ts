@@ -1,3 +1,3 @@
-import { JobType, JobStatus } from '#/types/job-types';
+import type { JobType, JobStatus } from '#/types/job-types.js';
 
-export { JobType, JobStatus };
+export type { JobType, JobStatus };

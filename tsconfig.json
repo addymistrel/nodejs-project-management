@@ -1,11 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "rootDir": "src",
     "outDir": "dist",
     "paths": {
+      "#/config": ["./src/config/index.ts"],
+      "#/constants": ["./src/constants/index.ts"],
+      "#/database": ["./src/database/index.ts"],
+      "#/database/relations": ["./src/database/relations/index.ts"],
+      "#/database/models": ["./src/database/models/index.ts"],
+      "#/types": ["./src/types/index.ts"],
+      "#/utils": ["./src/utils/index.ts"],
       "#/*": ["./src/*"]
     },
     "customConditions": ["development"],

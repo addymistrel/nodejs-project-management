@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
 import { databaseConfig } from '#/config';
+import { logger } from '#/utils';
 
 const databaseClient = new Sequelize(databaseConfig.url, {
   dialect: 'postgres',
@@ -15,10 +16,10 @@ const databaseClient = new Sequelize(databaseConfig.url, {
 async function connectToDatabase(): Promise<void> {
   try {
     await databaseClient.authenticate();
-    console.log('Database Connected Successfully');
-  } catch (err) {
-    console.log('Unable to connect to the database', err);
-    throw err;
+    logger.info('Database connection established');
+  } catch (error: unknown) {
+    logger.error('Unable to connect to the database', error);
+    throw error;
   }
 }
 

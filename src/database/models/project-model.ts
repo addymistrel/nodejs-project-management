@@ -6,8 +6,8 @@ interface ProjectAttributes {
   id: number;
   name: string;
   description: string | null;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 class ProjectModel extends Model implements ProjectAttributes {
@@ -47,4 +47,5 @@ ProjectModel.init(
   },
 );
 
-export { ProjectModel, ProjectAttributes };
+export { ProjectModel };
+export type { ProjectAttributes };

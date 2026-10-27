@@ -1,7 +1,8 @@
 import 'dotenv/config';
+import { logger } from '#/utils';
 
 const databaseUrl = process.env.DATABASE_URL;
-const NODE_ENV = process.env.NODE_ENV;
+const nodeEnvironment = process.env.NODE_ENV;
 
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is not configured');
@@ -9,7 +10,7 @@ if (!databaseUrl) {
 
 const databaseConfig = {
   url: databaseUrl,
-  logging: NODE_ENV === 'development' ? console.log : false,
+  logging: nodeEnvironment === 'development' ? logger.log.bind(logger) : false,
 };
 
 export { databaseConfig };
