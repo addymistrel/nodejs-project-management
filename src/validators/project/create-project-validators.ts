@@ -9,6 +9,7 @@ import {
   isPlainObject,
   isValidProjectDescription,
   isValidProjectName,
+  normalizeProjectDescription,
   normalizeString,
 } from '#/validators/project/helpers.js';
 import type { Request } from 'express';
@@ -59,7 +60,7 @@ function validateProjectValues(body: Record<string, unknown>): ValidationResult 
   if (!isValidProjectDescription(body.description)) {
     return {
       isValid: false,
-      message: `Project description must be a string with a maximum length of ${PROJECT_DESCRIPTION_MAX_LENGTH} characters`,
+      message: `Project description must be null or a string with a maximum length of ${PROJECT_DESCRIPTION_MAX_LENGTH} characters`,
     };
   }
 
@@ -69,7 +70,7 @@ function validateProjectValues(body: Record<string, unknown>): ValidationResult 
 function normalizeProjectBody(body: Record<string, unknown>): CreateProjectRequest {
   return {
     name: normalizeString(body.name as string),
-    description: normalizeString(body.description as string),
+    description: normalizeProjectDescription(body.description),
   };
 }
 

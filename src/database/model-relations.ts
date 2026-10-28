@@ -2,7 +2,7 @@ import {
   initializeJobFileRelations,
   initializeProjectFileRelations,
   initializeProjectJobRelations,
-} from '#/database/relations';
+} from '#/database';
 
 function initializeModelRelations(): void {
   initializeProjectFileRelations();

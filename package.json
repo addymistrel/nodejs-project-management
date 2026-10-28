@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch --conditions=development src/index.ts",
+    "dev": "tsx watch --conditions=development src/server.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "lint": "eslint .",
@@ -52,10 +52,35 @@
       "types": "./src/utils/index.ts",
       "default": "./dist/utils/index.js"
     },
+    "#/middlewares": {
+      "development": "./src/middlewares/index.ts",
+      "types": "./src/middlewares/index.ts",
+      "default": "./dist/middlewares/index.js"
+    },
     "#/validators": {
       "development": "./src/validators/index.ts",
       "types": "./src/validators/index.ts",
       "default": "./dist/validators/index.js"
+    },
+    "#/repositories": {
+      "development": "./src/repositories/index.ts",
+      "types": "./src/repositories/index.ts",
+      "default": "./dist/repositories/index.js"
+    },
+    "#/services": {
+      "development": "./src/services/index.ts",
+      "types": "./src/services/index.ts",
+      "default": "./dist/services/index.js"
+    },
+    "#/controllers": {
+      "development": "./src/controllers/index.ts",
+      "types": "./src/controllers/index.ts",
+      "default": "./dist/controllers/index.js"
+    },
+    "#/routes": {
+      "development": "./src/routes/index.ts",
+      "types": "./src/routes/index.ts",
+      "default": "./dist/routes/index.js"
     },
     "#/*": {
       "development": "./src/*",

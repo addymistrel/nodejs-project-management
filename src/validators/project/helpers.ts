@@ -21,14 +21,29 @@ function isValidString(value: unknown, maxLength: number): boolean {
   return string.length > 0 && string.length <= maxLength;
 }
 
-const isValidProjectName = (value: unknown): boolean =>
-  isValidString(value, PROJECT_NAME_MAX_LENGTH);
+function isValidProjectName(value: unknown): boolean {
+  return isValidString(value, PROJECT_NAME_MAX_LENGTH);
+}
 
-const isValidProjectDescription = (value: unknown): boolean =>
-  isValidString(value, PROJECT_DESCRIPTION_MAX_LENGTH);
+function isValidProjectDescription(value: unknown): boolean {
+  if (value === undefined || value === null) {
+    return true;
+  }
+
+  return isValidString(value, PROJECT_DESCRIPTION_MAX_LENGTH);
+}
 
 function normalizeString(value: string): string {
   return value.trim();
+}
+
+function normalizeProjectDescription(value: unknown): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const description = value.trim();
+  return description || null;
 }
 
 export {
@@ -36,5 +51,6 @@ export {
   isPlainObject,
   isValidProjectDescription,
   isValidProjectName,
+  normalizeProjectDescription,
   normalizeString,
 };

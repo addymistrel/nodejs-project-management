@@ -7,7 +7,7 @@ interface ProjectDetails {
   jobsCount: number;
 }
 
-async function createProject(projectData: CreateProjectRequest): Promise<ProjectModel> {
+async function createProjectRecord(projectData: CreateProjectRequest): Promise<ProjectModel> {
   return ProjectModel.create({
     name: projectData.name,
     description: projectData.description,
@@ -45,7 +45,7 @@ async function findProjectDetailsById(projectId: number): Promise<ProjectDetails
   };
 }
 
-async function updateProject(
+async function updateProjectRecord(
   project: ProjectModel,
   projectData: UpdateProjectRequest,
 ): Promise<ProjectModel> {
@@ -53,8 +53,15 @@ async function updateProject(
   return project;
 }
 
-async function deleteProject(project: ProjectModel): Promise<void> {
+async function deleteProjectRecord(project: ProjectModel): Promise<void> {
   await project.destroy();
 }
 
-export { createProject, updateProject, deleteProject, findProjectById, findProjectDetailsById };
+export {
+  createProjectRecord,
+  updateProjectRecord,
+  deleteProjectRecord,
+  findProjectById,
+  findProjectDetailsById,
+};
+export type { ProjectDetails };

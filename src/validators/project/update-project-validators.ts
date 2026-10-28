@@ -1,10 +1,12 @@
 import { PROJECT_SCHEMA_CONST } from '#/constants';
 import type { UpdateProjectRequest, ValidationResult } from '#/types';
+import { logger } from '#/utils';
 import {
   hasOnlyProjectFields,
   isPlainObject,
   isValidProjectDescription,
   isValidProjectName,
+  normalizeProjectDescription,
   normalizeString,
 } from '#/validators/project/helpers.js';
 import type { Request } from 'express';
@@ -44,7 +46,7 @@ function validateProjectFields(
     return {
       isValid: false,
       message:
-        'Project description must be a string or null with a maximum length of 5000 characters',
+        'Project description must be null or a string or null with a maximum length of 5000 characters',
     };
   }
 
@@ -72,7 +74,7 @@ function normalizeUpdateProjectBody(body: Record<string, unknown>): UpdateProjec
   }
 
   if (Object.hasOwn(body, fields.DESCRIPTION)) {
-    validatedBody.description = normalizeString(body.description as string);
+    validatedBody.description = normalizeProjectDescription(body.description);
   }
 
   return validatedBody;
