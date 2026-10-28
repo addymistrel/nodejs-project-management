@@ -5,7 +5,8 @@ import type {
   ProjectResponse,
   UpdateProjectRequest,
 } from '#/types/project-types.js';
-import { RequestValidator, ValidationResult } from '#/types/validation-types.js';
+import type { RequestValidator, ValidationResult } from '#/types/validation-types.js';
+import type { FileResponse } from '#/types/file-types.js';
 
 export type {
   JobType,
@@ -16,4 +17,5 @@ export type {
   UpdateProjectRequest,
   RequestValidator,
   ValidationResult,
+  FileResponse,
 };

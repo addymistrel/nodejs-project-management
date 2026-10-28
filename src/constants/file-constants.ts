@@ -26,4 +26,10 @@ const FILE_SCHEMA_CONST = {
   },
 };
 
-export { FILE_SCHEMA_CONST };
+const UPLOAD_DEFAULT_DIR = 'uploads';
+
+const FILE_FOLDER_NAME = 'files';
+
+const DEFAULT_FILE_NAME_PREFIX = 'uploaded-file-';
+
+export { FILE_SCHEMA_CONST, UPLOAD_DEFAULT_DIR, FILE_FOLDER_NAME, DEFAULT_FILE_NAME_PREFIX };
