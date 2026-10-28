@@ -1,14 +1,10 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
-type AsyncRequestHandler = (
-  request: Request,
-  response: Response,
-  next: NextFunction,
-) => Promise<void>;
+type AsyncRequestHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
 
 function asyncHandler(handler: AsyncRequestHandler): RequestHandler {
-  return (request, response, next) => {
-    void handler(request, response, next).catch(next);
+  return (req, res, next) => {
+    void handler(req, res, next).catch(next);
   };
 }
 
