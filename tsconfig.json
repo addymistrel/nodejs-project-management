@@ -11,6 +11,7 @@
       "#/database": ["./src/database/index.ts"],
       "#/types": ["./src/types/index.ts"],
       "#/utils": ["./src/utils/index.ts"],
+      "#/validators": ["./src/validators/index.ts"],
       "#/*": ["./src/*"]
     },
     "customConditions": ["development"],

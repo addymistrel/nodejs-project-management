@@ -52,6 +52,11 @@
       "types": "./src/utils/index.ts",
       "default": "./dist/utils/index.js"
     },
+    "#/validators": {
+      "development": "./src/validators/index.ts",
+      "types": "./src/validators/index.ts",
+      "default": "./dist/validators/index.js"
+    },
     "#/*": {
       "development": "./src/*",
       "types": "./src/*",
