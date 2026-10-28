@@ -1,5 +1,5 @@
 import { FILE_SCHEMA_CONST, PROJECT_SCHEMA_CONST } from '#/constants';
-import { FileModel, ProjectModel } from '#/database/models';
+import { FileModel, ProjectModel } from '#/database';
 
 function initializeProjectFileRelations(): void {
   ProjectModel.hasMany(FileModel, {

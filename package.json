@@ -42,16 +42,6 @@
       "types": "./src/database/index.ts",
       "default": "./dist/database/index.js"
     },
-    "#/database/relations": {
-      "development": "./src/database/relations/index.ts",
-      "types": "./src/database/relations/index.ts",
-      "default": "./dist/database/relations/index.js"
-    },
-    "#/database/models": {
-      "development": "./src/database/models/index.ts",
-      "types": "./src/database/models/index.ts",
-      "default": "./dist/database/models/index.js"
-    },
     "#/types": {
       "development": "./src/types/index.ts",
       "types": "./src/types/index.ts",
