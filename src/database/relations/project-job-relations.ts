@@ -1,5 +1,5 @@
 import { JOB_SCHEMA_CONST, PROJECT_SCHEMA_CONST } from '#/constants';
-import { JobModel, ProjectModel } from '#/database/models';
+import { JobModel, ProjectModel } from '#/database';
 
 function initializeProjectJobRelations(): void {
   ProjectModel.hasMany(JobModel, {

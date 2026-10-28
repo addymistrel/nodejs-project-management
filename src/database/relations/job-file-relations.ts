@@ -1,5 +1,5 @@
 import { FILE_SCHEMA_CONST, JOB_SCHEMA_CONST } from '#/constants';
-import { FileModel, JobModel } from '#/database/models';
+import { FileModel, JobModel } from '#/database';
 
 function initializeJobFileRelations(): void {
   JobModel.belongsTo(FileModel, {
