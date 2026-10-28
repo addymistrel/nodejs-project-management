@@ -1,6 +1,5 @@
 import { PROJECT_SCHEMA_CONST } from '#/constants';
 import type { UpdateProjectRequest, ValidationResult } from '#/types';
-import { logger } from '#/utils';
 import {
   hasOnlyProjectFields,
   isPlainObject,
