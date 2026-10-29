@@ -1,7 +1,6 @@
 import { DEFAULT_MIME_TYPE } from '#/constants';
 import { FileAttributes } from '#/database';
 import {
-  CreateFileRecordInput,
   createFileRecords,
   deleteFileRecord,
   findFilesByProjectAndId,
