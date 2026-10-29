@@ -1,8 +1,8 @@
 import { ValidationResult } from '#/types';
 import { Request } from 'express';
 
-function validateProjectId(request: Request): ValidationResult {
-  const { projectId } = request.params;
+function validateProjectId(req: Request): ValidationResult {
+  const { projectId } = req.params;
 
   if (typeof projectId !== 'string' || !/^[1-9]\d*$/.test(projectId)) {
     return {

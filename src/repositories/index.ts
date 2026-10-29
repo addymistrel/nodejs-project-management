@@ -5,7 +5,13 @@ import {
   findProjectById,
   findProjectDetailsById,
 } from '#/repositories/project-repository.js';
-import type { ProjectDetails } from '#/repositories/project-repository.js';
+import {
+  createFileRecords,
+  deleteFileRecord,
+  findFilesByProjectAndId,
+  findFilesByProjectId,
+} from '#/repositories/file-repository.js';
+import type { CreateFileRecordInput } from '#/repositories/file-repository.js';
 
 export {
   createProjectRecord,
@@ -13,5 +19,9 @@ export {
   deleteProjectRecord,
   findProjectById,
   findProjectDetailsById,
+  createFileRecords,
+  deleteFileRecord,
+  findFilesByProjectAndId,
+  findFilesByProjectId,
 };
-export type { ProjectDetails };
+export type { CreateFileRecordInput };

@@ -26,4 +26,24 @@ const FILE_SCHEMA_CONST = {
   },
 };
 
-export { FILE_SCHEMA_CONST };
+const UPLOAD_DEFAULT_DIR = 'uploads';
+
+const FILE_FOLDER_NAME = 'files';
+
+const DEFAULT_FILE_NAME_PREFIX = 'uploaded-file-';
+
+const MAX_FILE_PER_UPLOAD = 20;
+
+const MAX_FILE_SIZE_ALLOWED = 100 * 1024 * 1024;
+
+const DEFAULT_MIME_TYPE = 'application/octet-stream';
+
+export {
+  FILE_SCHEMA_CONST,
+  UPLOAD_DEFAULT_DIR,
+  FILE_FOLDER_NAME,
+  DEFAULT_FILE_NAME_PREFIX,
+  MAX_FILE_PER_UPLOAD,
+  MAX_FILE_SIZE_ALLOWED,
+  DEFAULT_MIME_TYPE,
+};

@@ -64,4 +64,3 @@ export {
   findProjectById,
   findProjectDetailsById,
 };
-export type { ProjectDetails };
