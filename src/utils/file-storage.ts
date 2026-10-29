@@ -1,15 +1,7 @@
-import {
-  DEFAULT_FILE_NAME_PREFIX,
-  FILE_FOLDER_NAME,
-  UPLOAD_DEFAULT_DIR,
-} from '#/constants/file-constants.js';
+import { DEFAULT_FILE_NAME_PREFIX, FILE_FOLDER_NAME, UPLOAD_DEFAULT_DIR } from '#/constants';
 import { randomUUID } from 'crypto';
 import { mkdir } from 'fs/promises';
 import path from 'path';
-
-type UploadedFile = {
-  path: string;
-};
 
 const uploadsFolderRoot = path.resolve(process.env.UPLOADS_DIR ?? UPLOAD_DEFAULT_DIR);
 
@@ -37,7 +29,7 @@ async function ensureProjectFilesDirectory(projectId: number): Promise<string> {
   return dir;
 }
 
-function getStoragePath(file: UploadedFile): string {
+function getStoragePath(file: Express.Multer.File): string {
   return path.relative(process.cwd(), file.path);
 }
 
