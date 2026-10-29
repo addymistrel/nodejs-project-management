@@ -10,6 +10,7 @@ import {
   deleteFileController,
   downloadFileController,
 } from '#/controllers/file-controller.js';
+import { createZipJobController, getJobController } from '#/controllers/job-controller.js';
 
 export {
   createProjectController,
@@ -20,4 +21,6 @@ export {
   listFilesController,
   deleteFileController,
   downloadFileController,
+  createZipJobController,
+  getJobController,
 };

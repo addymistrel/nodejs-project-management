@@ -12,6 +12,14 @@ import {
   findFilesByProjectId,
 } from '#/repositories/file-repository.js';
 import type { CreateFileRecordInput } from '#/repositories/file-repository.js';
+import {
+  completeJob,
+  createZipJobRecord,
+  failJob,
+  findJobByProjectAndId,
+  markJobProcessing,
+  updateJobProgress,
+} from '#/repositories/job-repository.js';
 
 export {
   createProjectRecord,
@@ -23,5 +31,11 @@ export {
   deleteFileRecord,
   findFilesByProjectAndId,
   findFilesByProjectId,
+  completeJob,
+  createZipJobRecord,
+  failJob,
+  findJobByProjectAndId,
+  markJobProcessing,
+  updateJobProgress,
 };
 export type { CreateFileRecordInput };

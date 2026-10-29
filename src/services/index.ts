@@ -11,6 +11,7 @@ import {
   toFileResponse,
   uploadProjectFiles,
 } from '#/services/file-service.js';
+import { createZipJob, getZipJob } from '#/services/job-service.js';
 
 export {
   createProject,
@@ -22,4 +23,6 @@ export {
   listProjectFiles,
   toFileResponse,
   uploadProjectFiles,
+  createZipJob,
+  getZipJob,
 };
