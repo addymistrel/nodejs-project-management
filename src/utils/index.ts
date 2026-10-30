@@ -3,7 +3,9 @@ import { AppError } from '#/utils/app-error.js';
 import { asyncHandler } from '#/utils/async-handler.js';
 import {
   ensureProjectFilesDirectory,
+  ensureProjectJobsDirectory,
   getProjectFilesDir,
+  getProjectJobsDir,
   getStoragePath,
   resolveStoragePath,
   getCleanFileName,
@@ -14,7 +16,9 @@ export {
   asyncHandler,
   logger,
   ensureProjectFilesDirectory,
+  ensureProjectJobsDirectory,
   getProjectFilesDir,
+  getProjectJobsDir,
   getStoragePath,
   resolveStoragePath,
   getCleanFileName,

@@ -7,6 +7,7 @@ import type {
 } from '#/types/project-types.js';
 import type { RequestValidator, ValidationResult } from '#/types/validation-types.js';
 import type { FileResponse } from '#/types/file-types.js';
+import type { CreateZipJobRequest, JobResponse } from '#/types/job-types.js';
 
 export type {
   JobType,
@@ -18,4 +19,6 @@ export type {
   RequestValidator,
   ValidationResult,
   FileResponse,
+  CreateZipJobRequest,
+  JobResponse,
 };

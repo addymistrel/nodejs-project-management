@@ -2,7 +2,7 @@ import express from 'express';
 
 import { initializeModelRelations } from '#/database';
 import { logger } from '#/utils';
-import { fileRouter, projectRouter } from '#/routes';
+import { fileRouter, jobRouter, projectRouter } from '#/routes';
 import { errorHandler } from '#/middlewares';
 
 const app = express();
@@ -18,6 +18,7 @@ app.get('/health', (_request, response) => {
 
 app.use('/api/projects', projectRouter);
 app.use('/api/projects/:projectId/files', fileRouter);
+app.use('/api/projects/:projectId/jobs', jobRouter);
 
 app.use(errorHandler);
 

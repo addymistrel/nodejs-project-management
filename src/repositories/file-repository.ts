@@ -6,6 +6,7 @@ interface CreateFileRecordInput {
   storagePath: string;
   size: number;
   mimeType: string;
+  isOutput?: boolean;
 }
 
 async function createFileRecords(
@@ -20,7 +21,7 @@ async function createFileRecords(
       size: file.size,
       mimeType: file.mimeType,
       checksum: null,
-      isOutput: false,
+      isOutput: file.isOutput ?? false,
     })),
   );
 }
