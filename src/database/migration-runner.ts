@@ -39,7 +39,11 @@ const command = process.argv[2] ?? 'up';
 
 runMigrationCommand(command)
   .catch((error: unknown) => {
-    logger.error('Migration command failed', error);
+    logger.error('Migration command failed', error, {
+      functionName: 'runMigrationCommand',
+      event: 'database.migration.failed',
+      command,
+    });
     process.exitCode = 1;
   })
   .finally(async () => {

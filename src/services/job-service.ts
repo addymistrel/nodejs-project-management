@@ -7,6 +7,7 @@ import {
   ProjectNotFoundException,
   ensureProjectJobsDirectory,
   getProjectJobsDir,
+  logger,
   resolveStoragePath,
 } from '#/utils';
 import { Worker } from 'worker_threads';
@@ -50,35 +51,24 @@ class JobService extends BaseService<JobRepository> {
       throw new JobNotFoundException();
     }
 
+    logger.info('ZIP job status retrieved', {
+      functionName: 'JobService.getZipJob',
+      event: 'job.get.completed',
+      projectId,
+      jobId,
+    });
+
     return toJobResponse(job);
   }
 
   async createZipJob(projectId: number, request: CreateZipJobRequest): Promise<JobResponse> {
     await this.assertProject(projectId);
-    const files = await Promise.all(
-      request.fileIds.map((fileId) => this.repository.findFilesByProjectAndId(projectId, fileId)),
-    );
-
-    if (files.some((file) => !file)) {
-      throw new FileDoesNotBelongToProjectException();
-    }
-
-    const sourceFiles = files.map((file) => {
-      if (!file) {
-        throw new FileDoesNotBelongToProjectException();
-      }
-
-      return {
-        path: resolveStoragePath(file.storagePath),
-        name: file.name,
-      };
-    });
-
+    const sourceFiles = await this.getSourceFiles(projectId, request.fileIds);
     const job = await this.repository.createZipJob(projectId);
     await this.repository.markProcessing(job.id);
     await this.runZipWorker(job.id, projectId, sourceFiles);
     await job.reload();
-
+    this.logJobStarted(projectId, job.id, sourceFiles.length);
     return toJobResponse(job);
   }
 
@@ -93,18 +83,10 @@ class JobService extends BaseService<JobRepository> {
       workerData: { outputPath, files },
     });
 
-    worker.on('message', (message: WorkerMessage) => {
-      void this.handleWorkerMessage(message, jobId, projectId, outputPath).catch((error: unknown) =>
-        this.repository.fail(
-          jobId,
-          error instanceof Error ? error.message : 'Unable to update job state',
-        ),
-      );
-    });
-
-    worker.on('error', (error: Error) => {
-      void this.repository.fail(jobId, error.message);
-    });
+    worker.on('message', (message: WorkerMessage) =>
+      this.handleWorkerMessageSafely(message, jobId, projectId, outputPath),
+    );
+    worker.on('error', (error: Error) => this.handleWorkerError(error, projectId, jobId));
   }
 
   private async handleWorkerMessage(
@@ -124,6 +106,12 @@ class JobService extends BaseService<JobRepository> {
     }
 
     if (message.type === 'failed') {
+      logger.error('ZIP job failed', new Error(message.error ?? 'ZIP creation failed'), {
+        functionName: 'JobService.handleWorkerMessage',
+        event: 'job.zip.failed',
+        projectId,
+        jobId,
+      });
       await this.repository.fail(jobId, message.error ?? 'ZIP creation failed');
     }
   }
@@ -145,7 +133,9 @@ class JobService extends BaseService<JobRepository> {
         },
       ]);
       await this.repository.complete(jobId, outputFile.id);
+      this.logJobCompleted(projectId, jobId, outputFile.id);
     } catch (error: unknown) {
+      this.logOutputFailure(projectId, jobId, error);
       await this.repository.fail(
         jobId,
         error instanceof Error ? error.message : 'Unable to save ZIP output',
@@ -157,6 +147,88 @@ class JobService extends BaseService<JobRepository> {
     if (!(await this.repository.findProjectById(projectId))) {
       throw new ProjectNotFoundException();
     }
+  }
+
+  private async getSourceFiles(
+    projectId: number,
+    fileIds: number[],
+  ): Promise<Array<{ path: string; name: string }>> {
+    const files = await Promise.all(
+      fileIds.map((fileId) => this.repository.findFilesByProjectAndId(projectId, fileId)),
+    );
+
+    if (files.some((file) => !file)) {
+      throw new FileDoesNotBelongToProjectException();
+    }
+
+    return files.map((file) => {
+      if (!file) {
+        throw new FileDoesNotBelongToProjectException();
+      }
+
+      return { path: resolveStoragePath(file.storagePath), name: file.name };
+    });
+  }
+
+  private async handleWorkerMessageSafely(
+    message: WorkerMessage,
+    jobId: number,
+    projectId: number,
+    outputPath: string,
+  ): Promise<void> {
+    try {
+      await this.handleWorkerMessage(message, jobId, projectId, outputPath);
+    } catch (error: unknown) {
+      logger.error('ZIP worker state update failed', error, {
+        functionName: 'JobService.runZipWorker',
+        event: 'job.worker.update.failed',
+        projectId,
+        jobId,
+      });
+      await this.repository.fail(
+        jobId,
+        error instanceof Error ? error.message : 'Unable to update job state',
+      );
+    }
+  }
+
+  private handleWorkerError(error: Error, projectId: number, jobId: number): void {
+    logger.error('ZIP worker failed', error, {
+      functionName: 'JobService.runZipWorker',
+      event: 'job.worker.failed',
+      projectId,
+      jobId,
+    });
+    void this.repository.fail(jobId, error.message);
+  }
+
+  private logJobStarted(projectId: number, jobId: number, fileCount: number): void {
+    logger.info('ZIP job started', {
+      functionName: 'JobService.createZipJob',
+      event: 'job.zip.started',
+      projectId,
+      jobId,
+      fileCount,
+    });
+  }
+
+  private logJobCompleted(projectId: number, jobId: number, outputFileId: number): void {
+    logger.info('ZIP job completed', {
+      functionName: 'JobService.finishZipJob',
+      event: 'job.zip.completed',
+      projectId,
+      jobId,
+      outputFileId,
+    });
+  }
+
+  private logOutputFailure(projectId: number, jobId: number, error: unknown): void {
+    logger.error('ZIP output could not be saved', error, {
+      functionName: 'JobService.finishZipJob',
+      event: 'job.zip.output.failed',
+      projectId,
+      jobId,
+    });
   }
 
   private getOutputPath(projectId: number, jobId: number): string {

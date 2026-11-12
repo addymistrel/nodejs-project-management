@@ -7,6 +7,7 @@ import {
   ProjectNotFoundException,
   RequiredFileException,
   getStoragePath,
+  logger,
   resolveStoragePath,
 } from '#/utils';
 import { unlink } from 'fs/promises';
@@ -43,19 +44,12 @@ class FileService extends BaseService<FileRepository> {
 
     try {
       await this.assertProjectExists(projectId);
-      const files = await this.repository.create(
-        projectId,
-        uploadedFiles.map((file) => ({
-          name: file.originalname,
-          storagePath: getStoragePath(file),
-          size: file.size,
-          mimeType: file.mimetype || DEFAULT_MIME_TYPE,
-        })),
-      );
-
+      const files = await this.createFiles(projectId, uploadedFiles);
+      this.logUploadCompleted(projectId, files.length);
       return files.map(toFileResponse);
     } catch (error: unknown) {
-      await Promise.all(uploadedFiles.map((file) => unlink(file.path).catch(() => undefined)));
+      await this.cleanupUploadedFiles(uploadedFiles);
+      this.logUploadFailed(projectId, uploadedFiles.length, error);
       throw error;
     }
   }
@@ -63,6 +57,12 @@ class FileService extends BaseService<FileRepository> {
   async listProjectFiles(projectId: number): Promise<FileResponse[]> {
     await this.assertProjectExists(projectId);
     const files = await this.repository.findByProjectId(projectId);
+    logger.info('Project files listed', {
+      functionName: 'FileService.listProjectFiles',
+      event: 'file.list.completed',
+      projectId,
+      fileCount: files.length,
+    });
     return files.map(toFileResponse);
   }
 
@@ -88,12 +88,55 @@ class FileService extends BaseService<FileRepository> {
     });
 
     await this.repository.delete(file);
+    logger.info('Project file deleted', {
+      functionName: 'FileService.deleteProjectFile',
+      event: 'file.delete.completed',
+      projectId,
+      fileId,
+    });
   }
 
   private async assertProjectExists(projectId: number): Promise<void> {
     if (!(await this.repository.findProjectById(projectId))) {
       throw new ProjectNotFoundException();
     }
+  }
+
+  private async createFiles(
+    projectId: number,
+    uploadedFiles: Express.Multer.File[],
+  ): Promise<FileModel[]> {
+    return this.repository.create(
+      projectId,
+      uploadedFiles.map((file) => ({
+        name: file.originalname,
+        storagePath: getStoragePath(file),
+        size: file.size,
+        mimeType: file.mimetype || DEFAULT_MIME_TYPE,
+      })),
+    );
+  }
+
+  private async cleanupUploadedFiles(uploadedFiles: Express.Multer.File[]): Promise<void> {
+    await Promise.all(uploadedFiles.map((file) => unlink(file.path).catch(() => undefined)));
+  }
+
+  private logUploadCompleted(projectId: number, fileCount: number): void {
+    logger.info('Project files uploaded', {
+      functionName: 'FileService.uploadProjectFiles',
+      event: 'file.upload.completed',
+      projectId,
+      fileCount,
+    });
+  }
+
+  private logUploadFailed(projectId: number, fileCount: number, error: unknown): void {
+    logger.error('Project file upload failed', error, {
+      functionName: 'FileService.uploadProjectFiles',
+      event: 'file.upload.failed',
+      projectId,
+      fileCount,
+    });
   }
 }
 

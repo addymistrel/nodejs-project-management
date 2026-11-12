@@ -16,9 +16,15 @@ const databaseClient = new Sequelize(databaseConfig.url, {
 async function connectToDatabase(): Promise<void> {
   try {
     await databaseClient.authenticate();
-    logger.info('Database connection established');
+    logger.info('Database connection established', {
+      functionName: 'connectDatabase',
+      event: 'database.connection.established',
+    });
   } catch (error: unknown) {
-    logger.error('Unable to connect to the database', error);
+    logger.error('Unable to connect to the database', error, {
+      functionName: 'connectDatabase',
+      event: 'database.connection.failed',
+    });
     throw error;
   }
 }
