@@ -2,12 +2,12 @@
   "name": "nodejs-project-management",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "test": "vitest run",
     "dev": "tsx watch --conditions=development src/server.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -82,6 +82,11 @@
       "types": "./src/routes/index.ts",
       "default": "./dist/routes/index.js"
     },
+    "#/docs": {
+      "development": "./src/docs/index.ts",
+      "types": "./src/docs/index.ts",
+      "default": "./dist/docs/index.js"
+    },
     "#/*": {
       "development": "./src/*",
       "types": "./src/*",
@@ -100,6 +105,7 @@
     "pg": "^8.23.1",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.8",
+    "swagger-ui-express": "^5.0.1",
     "umzug": "^3.8.3"
   },
   "devDependencies": {
@@ -109,6 +115,7 @@
     "@types/multer": "^2.3.0",
     "@types/node": "^26.6.5",
     "@types/supertest": "^7.2.1",
+    "@types/swagger-ui-express": "^4.1.8",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",

@@ -17,6 +17,7 @@
       "#/services": ["./src/services/index.ts"],
       "#/controllers": ["./src/controllers/index.ts"],
       "#/routes": ["./src/routes/index.ts"],
+      "#/docs": ["./src/docs/index.ts"],
       "#/*": ["./src/*"]
     },
     "customConditions": ["development"],
