@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AppError } from '../src/utils/app-error.js';
+import { ProjectNotFoundException } from '#/utils';
 
 const projectService = {
   createProject: vi.fn(),
@@ -36,9 +36,12 @@ describe('Project API', () => {
 
     expect(response.status).toBe(201);
     expect(response.body).toMatchObject({
-      id: 1,
-      name: 'Website redesign',
-      description: 'Refresh the public website',
+      success: true,
+      data: {
+        id: 1,
+        name: 'Website redesign',
+        description: 'Refresh the public website',
+      },
     });
     expect(projectService.createProject).toHaveBeenCalledWith({
       name: 'Website redesign',
@@ -57,10 +60,13 @@ describe('Project API', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({
-      id: 1,
-      name: 'Website redesign',
-      filesCount: 2,
-      jobsCount: 3,
+      success: true,
+      data: {
+        id: 1,
+        name: 'Website redesign',
+        filesCount: 2,
+        jobsCount: 3,
+      },
     });
     expect(projectService.getProject).toHaveBeenCalledWith(1);
   });
@@ -76,7 +82,7 @@ describe('Project API', () => {
     });
 
     expect(response.status).toBe(200);
-    expect(response.body.name).toBe('Updated website');
+    expect(response.body.data.name).toBe('Updated website');
     expect(projectService.updateProject).toHaveBeenCalledWith(1, {
       name: 'Updated website',
     });
@@ -87,8 +93,11 @@ describe('Project API', () => {
 
     const response = await request(app).delete('/api/projects/1');
 
-    expect(response.status).toBe(204);
-    expect(response.body).toEqual({});
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      success: true,
+      data: { message: 'Project deleted successfully' },
+    });
     expect(projectService.deleteProject).toHaveBeenCalledWith(1);
   });
 
@@ -103,7 +112,7 @@ describe('Project API', () => {
     const response = await request(app).post('/api/projects').send(payload);
 
     expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: message });
+    expect(response.body).toEqual({ success: false, error: message });
     expect(projectService.createProject).not.toHaveBeenCalled();
   });
 
@@ -113,7 +122,10 @@ describe('Project API', () => {
       const response = await request(app).get(url);
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual({ error: 'projectId must be a positive integer' });
+      expect(response.body).toEqual({
+        success: false,
+        error: 'projectId must be a positive integer',
+      });
       expect(projectService.getProject).not.toHaveBeenCalled();
     },
   );
@@ -122,16 +134,19 @@ describe('Project API', () => {
     const response = await request(app).patch('/api/projects/1').send({});
 
     expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: 'At least one project field is required' });
+    expect(response.body).toEqual({
+      success: false,
+      error: 'At least one project field is required',
+    });
     expect(projectService.updateProject).not.toHaveBeenCalled();
   });
 
   it('returns 404 when the service cannot find a project', async () => {
-    projectService.getProject.mockRejectedValue(new AppError('Project not found', 404));
+    projectService.getProject.mockRejectedValue(new ProjectNotFoundException());
 
     const response = await request(app).get('/api/projects/999');
 
     expect(response.status).toBe(404);
-    expect(response.body).toEqual({ error: 'Project not found' });
+    expect(response.body).toEqual({ success: false, error: 'Project not found' });
   });
 });

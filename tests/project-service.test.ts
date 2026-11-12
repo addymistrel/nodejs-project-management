@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AppError } from '../src/utils/app-error.js';
+import { AppExceptionBase } from '#/utils';
 
 const repository = vi.hoisted(() => ({
   createProjectRecord: vi.fn(),
@@ -59,7 +59,7 @@ describe('Project service', () => {
     expect(repository.findProjectDetailsById).toHaveBeenCalledWith(project.id);
   });
 
-  it('throws a not-found AppError when getting a missing project', async () => {
+  it('throws a not-found exception when getting a missing project', async () => {
     repository.findProjectDetailsById.mockResolvedValue(null);
 
     const promise = getProject(999);
@@ -68,7 +68,7 @@ describe('Project service', () => {
       message: 'Project not found',
       statusCode: 404,
     });
-    await expect(promise).rejects.toBeInstanceOf(AppError);
+    await expect(promise).rejects.toBeInstanceOf(AppExceptionBase);
   });
 
   it('updates an existing project and returns the updated fields', async () => {
@@ -85,7 +85,7 @@ describe('Project service', () => {
     });
   });
 
-  it('throws a not-found AppError when updating a missing project', async () => {
+  it('throws a not-found exception when updating a missing project', async () => {
     repository.findProjectById.mockResolvedValue(null);
 
     await expect(updateProject(999, { name: 'Updated website' })).rejects.toMatchObject({
@@ -105,7 +105,7 @@ describe('Project service', () => {
     expect(repository.deleteProjectRecord).toHaveBeenCalledWith(project);
   });
 
-  it('throws a not-found AppError when deleting a missing project', async () => {
+  it('throws a not-found exception when deleting a missing project', async () => {
     repository.findProjectById.mockResolvedValue(null);
 
     await expect(deleteProject(999)).rejects.toMatchObject({

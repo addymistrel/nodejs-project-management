@@ -12,7 +12,7 @@ import {
   ProjectResponse,
   UpdateProjectRequest,
 } from '#/types';
-import { AppError } from '#/utils';
+import { ProjectNotFoundException } from '#/utils';
 
 function toProjectResponse(project: ProjectAttributes): ProjectResponse {
   return {
@@ -34,7 +34,7 @@ async function getProject(projectId: number): Promise<ProjectDetailsResponse> {
   const projectDetails = await findProjectDetailsById(projectId);
 
   if (!projectDetails) {
-    throw new AppError('Project not found', 404);
+    throw new ProjectNotFoundException();
   }
 
   return {
@@ -51,7 +51,7 @@ async function updateProject(
   const project = await findProjectById(projectId);
 
   if (!project) {
-    throw new AppError('Project not found', 404);
+    throw new ProjectNotFoundException();
   }
 
   const updatedProject = await updateProjectRecord(project, projectData);
@@ -63,7 +63,7 @@ async function deleteProject(projectId: number): Promise<void> {
   const project = await findProjectById(projectId);
 
   if (!project) {
-    throw new AppError('Project not found', 404);
+    throw new ProjectNotFoundException();
   }
 
   await deleteProjectRecord(project);

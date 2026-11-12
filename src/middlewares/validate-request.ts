@@ -1,5 +1,5 @@
 import { RequestValidator } from '#/types';
-import { AppError } from '#/utils';
+import { InvalidRequestException } from '#/utils';
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 
 function validateRequest(validator: RequestValidator): RequestHandler {
@@ -7,7 +7,7 @@ function validateRequest(validator: RequestValidator): RequestHandler {
     const validationResult = validator(req);
 
     if (!validationResult.isValid) {
-      next(new AppError(validationResult.message ?? 'Invalid Request', 400));
+      next(new InvalidRequestException(validationResult.message));
       return;
     }
 

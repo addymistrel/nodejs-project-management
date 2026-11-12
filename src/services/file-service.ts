@@ -8,7 +8,13 @@ import {
   findProjectById,
 } from '#/repositories';
 import { FileResponse } from '#/types';
-import { AppError, getStoragePath, resolveStoragePath } from '#/utils';
+import {
+  FileNotFoundException,
+  ProjectNotFoundException,
+  RequiredFileException,
+  getStoragePath,
+  resolveStoragePath,
+} from '#/utils';
 import { unlink } from 'fs/promises';
 
 function toFileResponse(file: FileAttributes): FileResponse {
@@ -27,7 +33,7 @@ async function assertProjectExists(projectId: number): Promise<void> {
   const project = await findProjectById(projectId);
 
   if (!project) {
-    throw new AppError('Project not found', 404);
+    throw new ProjectNotFoundException();
   }
 }
 
@@ -36,7 +42,7 @@ async function uploadProjectFiles(
   uploadedFiles: Express.Multer.File[],
 ): Promise<FileResponse[]> {
   if (uploadedFiles.length === 0) {
-    throw new AppError('At least one file is required', 400);
+    throw new RequiredFileException();
   }
 
   try {
@@ -74,7 +80,7 @@ async function getProjectFile(projectId: number, fileId: number): Promise<FileAt
   const file = await findFilesByProjectAndId(projectId, fileId);
 
   if (!file) {
-    throw new AppError('File not found', 404);
+    throw new FileNotFoundException();
   }
 
   return file;
@@ -86,7 +92,7 @@ async function deleteProjectFile(projectId: number, fileId: number): Promise<voi
   const file = await findFilesByProjectAndId(projectId, fileId);
 
   if (!file) {
-    throw new AppError('File not found', 404);
+    throw new FileNotFoundException();
   }
 
   const absPath = resolveStoragePath(file.storagePath);

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AppError } from '#/utils';
+import { AppExceptionBase } from '#/utils';
 
 const repository = vi.hoisted(() => ({
   createFileRecords: vi.fn(),
@@ -110,7 +110,7 @@ describe('Job service', () => {
     repository.findProjectById.mockResolvedValue(project);
     repository.findJobByProjectAndId.mockResolvedValue(null);
 
-    await expect(getZipJob(2, 999)).rejects.toBeInstanceOf(AppError);
+    await expect(getZipJob(2, 999)).rejects.toBeInstanceOf(AppExceptionBase);
     await expect(getZipJob(2, 999)).rejects.toMatchObject({
       message: 'Job not found',
       statusCode: 404,

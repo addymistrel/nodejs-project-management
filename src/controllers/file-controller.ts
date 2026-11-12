@@ -4,7 +4,8 @@ import {
   listProjectFiles,
   uploadProjectFiles,
 } from '#/services';
-import { resolveStoragePath } from '#/utils';
+import { HTTP_STATUS_CODE } from '#/constants';
+import { AppResponse, resolveStoragePath } from '#/utils';
 import { Request, Response } from 'express';
 
 function getProjectId(req: Request): number {
@@ -29,17 +30,14 @@ async function uploadFilesController(req: Request, res: Response): Promise<void>
 
   const files = await uploadProjectFiles(projectId, uploadedFiles);
 
-  res.status(201).json({
-    projectId,
-    files,
-  });
+  AppResponse.sendSuccess(res, HTTP_STATUS_CODE.CREATED, { projectId, files });
 }
 
 async function listFilesController(req: Request, res: Response): Promise<void> {
   const projectId = getProjectId(req);
   const files = await listProjectFiles(projectId);
 
-  res.status(200).json(files);
+  AppResponse.sendSuccess(res, HTTP_STATUS_CODE.OK, files);
 }
 
 async function deleteFileController(req: Request, res: Response): Promise<void> {
@@ -48,7 +46,7 @@ async function deleteFileController(req: Request, res: Response): Promise<void> 
 
   await deleteProjectFile(projectId, fileId);
 
-  res.status(204).send();
+  AppResponse.sendSuccess(res, HTTP_STATUS_CODE.OK, { message: 'File deleted successfully' });
 }
 
 async function downloadFileController(req: Request, res: Response): Promise<void> {

@@ -2,9 +2,11 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 
 import { initializeModelRelations } from '#/database';
+import { HTTP_STATUS_CODE } from '#/constants';
 import { errorHandler } from '#/middlewares';
 import { fileRouter, jobRouter, projectRouter } from '#/routes';
 import { swaggerDocument } from '#/docs';
+import { AppResponse } from '#/utils';
 
 const app = express();
 
@@ -13,7 +15,7 @@ initializeModelRelations();
 app.use(express.json());
 
 app.get('/health', (_request, response) => {
-  response.json({ status: 'ok' });
+  AppResponse.sendSuccess(response, HTTP_STATUS_CODE.OK, { status: 'ok' });
 });
 
 app.get('/api-docs.json', (_request, response) => {

@@ -12,7 +12,9 @@ import {
 import type { JobAttributes } from '#/database';
 import type { CreateZipJobRequest, JobResponse } from '#/types';
 import {
-  AppError,
+  FileDoesNotBelongToProjectException,
+  JobNotFoundException,
+  ProjectNotFoundException,
   ensureProjectJobsDirectory,
   getProjectJobsDir,
   resolveStoragePath,
@@ -37,7 +39,7 @@ function toJobResponse(job: JobAttributes): JobResponse {
 
 async function assertProject(projectId: number): Promise<void> {
   if (!(await findProjectById(projectId))) {
-    throw new AppError('Project not found', 404);
+    throw new ProjectNotFoundException();
   }
 }
 
@@ -46,7 +48,7 @@ async function getZipJob(projectId: number, jobId: number): Promise<JobResponse>
   const job = await findJobByProjectAndId(projectId, jobId);
 
   if (!job) {
-    throw new AppError('Job not found', 404);
+    throw new JobNotFoundException();
   }
 
   return toJobResponse(job);
@@ -59,12 +61,12 @@ async function createZipJob(projectId: number, request: CreateZipJobRequest): Pr
     request.fileIds.map((fileId) => findFilesByProjectAndId(projectId, fileId)),
   );
   if (files.some((file) => !file)) {
-    throw new AppError('File does not belong to this project', 400);
+    throw new FileDoesNotBelongToProjectException();
   }
 
   const sourceFiles = files.map((file) => {
     if (!file) {
-      throw new AppError('File does not belong to this project', 400);
+      throw new FileDoesNotBelongToProjectException();
     }
     return {
       path: resolveStoragePath(file.storagePath),

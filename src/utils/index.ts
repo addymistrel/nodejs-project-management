@@ -1,6 +1,15 @@
 import { logger } from '#/utils/logger.js';
-import { AppError } from '#/utils/app-error.js';
+import { AppResponse } from '#/utils/app-response.js';
 import { asyncHandler } from '#/utils/async-handler.js';
+import {
+  AppExceptionBase,
+  FileDoesNotBelongToProjectException,
+  FileNotFoundException,
+  InvalidRequestException,
+  JobNotFoundException,
+  ProjectNotFoundException,
+  RequiredFileException,
+} from '#/utils/exceptions/index.js';
 import {
   ensureProjectFilesDirectory,
   ensureProjectJobsDirectory,
@@ -12,7 +21,8 @@ import {
 } from '#/utils/file-storage.js';
 
 export {
-  AppError,
+  AppExceptionBase,
+  AppResponse,
   asyncHandler,
   logger,
   ensureProjectFilesDirectory,
@@ -22,4 +32,10 @@ export {
   getStoragePath,
   resolveStoragePath,
   getCleanFileName,
+  FileDoesNotBelongToProjectException,
+  FileNotFoundException,
+  InvalidRequestException,
+  JobNotFoundException,
+  ProjectNotFoundException,
+  RequiredFileException,
 };

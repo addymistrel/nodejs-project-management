@@ -37,11 +37,21 @@ const swaggerDocument = {
               'application/json': {
                 schema: {
                   type: 'object',
-                  required: ['status'],
+                  required: ['success', 'data'],
                   properties: {
-                    status: {
-                      type: 'string',
-                      example: 'ok',
+                    success: {
+                      type: 'boolean',
+                      example: true,
+                    },
+                    data: {
+                      type: 'object',
+                      required: ['status'],
+                      properties: {
+                        status: {
+                          type: 'string',
+                          example: 'ok',
+                        },
+                      },
                     },
                   },
                 },
@@ -71,7 +81,7 @@ const swaggerDocument = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/Project',
+                  $ref: '#/components/schemas/SuccessProjectResponse',
                 },
               },
             },
@@ -97,7 +107,7 @@ const swaggerDocument = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/ProjectDetails',
+                  $ref: '#/components/schemas/SuccessProjectDetailsResponse',
                 },
               },
             },
@@ -126,7 +136,7 @@ const swaggerDocument = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/Project',
+                  $ref: '#/components/schemas/SuccessProjectResponse',
                 },
               },
             },
@@ -143,8 +153,15 @@ const swaggerDocument = {
         tags: ['Projects'],
         summary: 'Delete a project and its related data',
         responses: {
-          '204': {
+          '200': {
             description: 'Project deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/SuccessMessageResponse',
+                },
+              },
+            },
           },
           '404': {
             $ref: '#/components/responses/NotFound',
@@ -189,7 +206,7 @@ const swaggerDocument = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/UploadFilesResponse',
+                  $ref: '#/components/schemas/SuccessUploadFilesResponse',
                 },
               },
             },
@@ -205,7 +222,7 @@ const swaggerDocument = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/Error',
+                  $ref: '#/components/schemas/ErrorResponse',
                 },
               },
             },
@@ -221,10 +238,7 @@ const swaggerDocument = {
             content: {
               'application/json': {
                 schema: {
-                  type: 'array',
-                  items: {
-                    $ref: '#/components/schemas/File',
-                  },
+                  $ref: '#/components/schemas/SuccessFileListResponse',
                 },
               },
             },
@@ -248,8 +262,15 @@ const swaggerDocument = {
         tags: ['Files'],
         summary: 'Delete a project file',
         responses: {
-          '204': {
+          '200': {
             description: 'File deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/SuccessMessageResponse',
+                },
+              },
+            },
           },
           '404': {
             $ref: '#/components/responses/NotFound',
@@ -313,7 +334,7 @@ const swaggerDocument = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/Job',
+                  $ref: '#/components/schemas/SuccessJobResponse',
                 },
               },
             },
@@ -345,7 +366,7 @@ const swaggerDocument = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/Job',
+                  $ref: '#/components/schemas/SuccessJobResponse',
                 },
               },
             },
@@ -599,6 +620,107 @@ const swaggerDocument = {
           },
         },
       },
+      SuccessProjectResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: {
+            type: 'boolean',
+            example: true,
+          },
+          data: {
+            $ref: '#/components/schemas/Project',
+          },
+        },
+      },
+      SuccessProjectDetailsResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: {
+            type: 'boolean',
+            example: true,
+          },
+          data: {
+            $ref: '#/components/schemas/ProjectDetails',
+          },
+        },
+      },
+      SuccessUploadFilesResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: {
+            type: 'boolean',
+            example: true,
+          },
+          data: {
+            $ref: '#/components/schemas/UploadFilesResponse',
+          },
+        },
+      },
+      SuccessFileListResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: {
+            type: 'boolean',
+            example: true,
+          },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/File',
+            },
+          },
+        },
+      },
+      SuccessJobResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: {
+            type: 'boolean',
+            example: true,
+          },
+          data: {
+            $ref: '#/components/schemas/Job',
+          },
+        },
+      },
+      SuccessMessageResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: {
+            type: 'boolean',
+            example: true,
+          },
+          data: {
+            type: 'object',
+            required: ['message'],
+            properties: {
+              message: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+      ErrorResponse: {
+        type: 'object',
+        required: ['success', 'error'],
+        properties: {
+          success: {
+            type: 'boolean',
+            example: false,
+          },
+          error: {
+            type: 'string',
+            example: 'Project not found',
+          },
+        },
+      },
       Error: {
         type: 'object',
         required: ['error'],
@@ -616,7 +738,7 @@ const swaggerDocument = {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/Error',
+              $ref: '#/components/schemas/ErrorResponse',
             },
           },
         },
@@ -626,7 +748,7 @@ const swaggerDocument = {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/Error',
+              $ref: '#/components/schemas/ErrorResponse',
             },
           },
         },
