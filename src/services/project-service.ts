@@ -1,18 +1,78 @@
 import { ProjectAttributes } from '#/database';
-import {
-  createProjectRecord,
-  deleteProjectRecord,
-  findProjectById,
-  findProjectDetailsById,
-  updateProjectRecord,
-} from '#/repositories';
-import {
+import * as repositoryFunctions from '#/repositories';
+import type {
   CreateProjectRequest,
   ProjectDetailsResponse,
   ProjectResponse,
   UpdateProjectRequest,
 } from '#/types';
 import { ProjectNotFoundException } from '#/utils';
+import { BaseService } from '#/services/base-service.js';
+
+interface ProjectRepository {
+  create: typeof repositoryFunctions.createProjectRecord;
+  findById: typeof repositoryFunctions.findProjectById;
+  findDetailsById: typeof repositoryFunctions.findProjectDetailsById;
+  update: typeof repositoryFunctions.updateProjectRecord;
+  delete: typeof repositoryFunctions.deleteProjectRecord;
+}
+
+const defaultProjectRepository: ProjectRepository = {
+  create: (...args) => repositoryFunctions.createProjectRecord(...args),
+  findById: (...args) => repositoryFunctions.findProjectById(...args),
+  findDetailsById: (...args) => repositoryFunctions.findProjectDetailsById(...args),
+  update: (...args) => repositoryFunctions.updateProjectRecord(...args),
+  delete: (...args) => repositoryFunctions.deleteProjectRecord(...args),
+};
+
+class ProjectService extends BaseService<ProjectRepository> {
+  constructor(repository: ProjectRepository) {
+    super(repository);
+  }
+
+  async createProject(projectData: CreateProjectRequest): Promise<ProjectResponse> {
+    const project = await this.repository.create(projectData);
+    return toProjectResponse(project);
+  }
+
+  async getProject(projectId: number): Promise<ProjectDetailsResponse> {
+    const projectDetails = await this.repository.findDetailsById(projectId);
+
+    if (!projectDetails) {
+      throw new ProjectNotFoundException();
+    }
+
+    return {
+      ...toProjectResponse(projectDetails.project),
+      filesCount: projectDetails.filesCount,
+      jobsCount: projectDetails.jobsCount,
+    };
+  }
+
+  async updateProject(
+    projectId: number,
+    projectData: UpdateProjectRequest,
+  ): Promise<ProjectResponse> {
+    const project = await this.repository.findById(projectId);
+
+    if (!project) {
+      throw new ProjectNotFoundException();
+    }
+
+    const updatedProject = await this.repository.update(project, projectData);
+    return toProjectResponse(updatedProject);
+  }
+
+  async deleteProject(projectId: number): Promise<void> {
+    const project = await this.repository.findById(projectId);
+
+    if (!project) {
+      throw new ProjectNotFoundException();
+    }
+
+    await this.repository.delete(project);
+  }
+}
 
 function toProjectResponse(project: ProjectAttributes): ProjectResponse {
   return {
@@ -24,49 +84,12 @@ function toProjectResponse(project: ProjectAttributes): ProjectResponse {
   };
 }
 
-async function createProject(projectData: CreateProjectRequest): Promise<ProjectResponse> {
-  const project = await createProjectRecord(projectData);
+const projectService = new ProjectService(defaultProjectRepository);
 
-  return toProjectResponse(project);
-}
+const createProject = projectService.createProject.bind(projectService);
+const deleteProject = projectService.deleteProject.bind(projectService);
+const getProject = projectService.getProject.bind(projectService);
+const updateProject = projectService.updateProject.bind(projectService);
 
-async function getProject(projectId: number): Promise<ProjectDetailsResponse> {
-  const projectDetails = await findProjectDetailsById(projectId);
-
-  if (!projectDetails) {
-    throw new ProjectNotFoundException();
-  }
-
-  return {
-    ...toProjectResponse(projectDetails.project),
-    filesCount: projectDetails.filesCount,
-    jobsCount: projectDetails.jobsCount,
-  };
-}
-
-async function updateProject(
-  projectId: number,
-  projectData: UpdateProjectRequest,
-): Promise<ProjectResponse> {
-  const project = await findProjectById(projectId);
-
-  if (!project) {
-    throw new ProjectNotFoundException();
-  }
-
-  const updatedProject = await updateProjectRecord(project, projectData);
-
-  return toProjectResponse(updatedProject);
-}
-
-async function deleteProject(projectId: number): Promise<void> {
-  const project = await findProjectById(projectId);
-
-  if (!project) {
-    throw new ProjectNotFoundException();
-  }
-
-  await deleteProjectRecord(project);
-}
-
-export { createProject, deleteProject, getProject, updateProject };
+export { ProjectService, createProject, deleteProject, getProject, updateProject };
+export type { ProjectRepository };

@@ -12,6 +12,10 @@ import {
   uploadProjectFiles,
 } from '#/services/file-service.js';
 import { createZipJob, getZipJob } from '#/services/job-service.js';
+import { BaseService } from '#/services/base-service.js';
+import { FileService } from '#/services/file-service.js';
+import { JobService } from '#/services/job-service.js';
+import { ProjectService } from '#/services/project-service.js';
 
 export {
   createProject,
@@ -25,4 +29,8 @@ export {
   uploadProjectFiles,
   createZipJob,
   getZipJob,
+  BaseService,
+  FileService,
+  JobService,
+  ProjectService,
 };
