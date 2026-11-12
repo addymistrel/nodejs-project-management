@@ -26,6 +26,11 @@ Start the service and open [Swagger UI](http://localhost:3000/api-docs/) to
 explore and try the API. The machine-readable OpenAPI document is available at
 `http://localhost:3000/api-docs.json`.
 
+JSON API responses use a consistent envelope:
+
+- Success: `{ "success": true, "data": {} }`
+- Error: `{ "success": false, "error": "Project not found" }`
+
 ## Job processing
 
 `POST /api/projects/:projectId/jobs/zip` validates every requested file against

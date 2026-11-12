@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AppError } from '#/utils';
+import { AppExceptionBase } from '#/utils';
 import path from 'path';
 
 const repository = vi.hoisted(() => ({
@@ -121,7 +121,7 @@ describe('File service', () => {
     repository.findProjectById.mockResolvedValue(project);
     repository.findFilesByProjectAndId.mockResolvedValue(null);
 
-    await expect(getProjectFile(2, 999)).rejects.toBeInstanceOf(AppError);
+    await expect(getProjectFile(2, 999)).rejects.toBeInstanceOf(AppExceptionBase);
     await expect(getProjectFile(2, 999)).rejects.toMatchObject({
       message: 'File not found',
       statusCode: 404,

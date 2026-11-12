@@ -1,5 +1,7 @@
 import type { Request, Response } from 'express';
+import { HTTP_STATUS_CODE } from '#/constants';
 import { createProject, deleteProject, getProject, updateProject } from '#/services';
+import { AppResponse } from '#/utils';
 
 function getProjectId(req: Request): number {
   return Number(req.params.projectId);
@@ -8,21 +10,21 @@ function getProjectId(req: Request): number {
 async function createProjectController(req: Request, res: Response): Promise<void> {
   const project = await createProject(req.body);
 
-  res.status(201).json(project);
+  AppResponse.sendSuccess(res, HTTP_STATUS_CODE.CREATED, project);
 }
 
 async function getProjectController(req: Request, res: Response): Promise<void> {
   const projectId = getProjectId(req);
   const project = await getProject(projectId);
 
-  res.status(200).json(project);
+  AppResponse.sendSuccess(res, HTTP_STATUS_CODE.OK, project);
 }
 
 async function updateProjectController(req: Request, res: Response): Promise<void> {
   const projectId = getProjectId(req);
   const project = await updateProject(projectId, req.body);
 
-  res.status(200).json(project);
+  AppResponse.sendSuccess(res, HTTP_STATUS_CODE.OK, project);
 }
 
 async function deleteProjectController(req: Request, res: Response): Promise<void> {
@@ -30,7 +32,7 @@ async function deleteProjectController(req: Request, res: Response): Promise<voi
 
   await deleteProject(projectId);
 
-  res.status(204).send();
+  AppResponse.sendSuccess(res, HTTP_STATUS_CODE.OK, { message: 'Project deleted successfully' });
 }
 
 export {
