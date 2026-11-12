@@ -20,6 +20,12 @@ files are ordinary file records marked with `is_output = true`, so download
 ownership is checked through the same project-scoped file query as uploaded
 files.
 
+## API documentation
+
+Start the service and open [Swagger UI](http://localhost:3000/api-docs/) to
+explore and try the API. The machine-readable OpenAPI document is available at
+`http://localhost:3000/api-docs.json`.
+
 ## Job processing
 
 `POST /api/projects/:projectId/jobs/zip` validates every requested file against
