@@ -6,7 +6,7 @@ import type {
   ProjectResponse,
   UpdateProjectRequest,
 } from '#/types';
-import { ProjectNotFoundException } from '#/utils';
+import { ProjectNotFoundException, logger } from '#/utils';
 import { BaseService } from '#/services/base-service.js';
 
 interface ProjectRepository {
@@ -32,6 +32,11 @@ class ProjectService extends BaseService<ProjectRepository> {
 
   async createProject(projectData: CreateProjectRequest): Promise<ProjectResponse> {
     const project = await this.repository.create(projectData);
+    logger.info('Project created', {
+      functionName: 'ProjectService.createProject',
+      event: 'project.create.completed',
+      projectId: project.id,
+    });
     return toProjectResponse(project);
   }
 
@@ -41,6 +46,12 @@ class ProjectService extends BaseService<ProjectRepository> {
     if (!projectDetails) {
       throw new ProjectNotFoundException();
     }
+
+    logger.info('Project details retrieved', {
+      functionName: 'ProjectService.getProject',
+      event: 'project.get.completed',
+      projectId,
+    });
 
     return {
       ...toProjectResponse(projectDetails.project),
@@ -60,6 +71,11 @@ class ProjectService extends BaseService<ProjectRepository> {
     }
 
     const updatedProject = await this.repository.update(project, projectData);
+    logger.info('Project updated', {
+      functionName: 'ProjectService.updateProject',
+      event: 'project.update.completed',
+      projectId,
+    });
     return toProjectResponse(updatedProject);
   }
 
@@ -71,6 +87,11 @@ class ProjectService extends BaseService<ProjectRepository> {
     }
 
     await this.repository.delete(project);
+    logger.info('Project deleted', {
+      functionName: 'ProjectService.deleteProject',
+      event: 'project.delete.completed',
+      projectId,
+    });
   }
 }
 

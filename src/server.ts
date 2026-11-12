@@ -4,5 +4,9 @@ import { logger } from '#/utils';
 const port = Number(process.env.PORT ?? 3000);
 
 app.listen(port, () => {
-  logger.info(`Server listening on port ${port}`);
+  logger.info('Server listening', {
+    functionName: 'startServer',
+    event: 'server.started',
+    port,
+  });
 });

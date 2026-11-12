@@ -21,7 +21,10 @@ const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, _next): vo
     return;
   }
 
-  logger.error('Unexpected application error', error);
+  logger.error('Unexpected application error', error, {
+    functionName: 'errorHandler',
+    event: 'http.request.failed',
+  });
 
   AppResponse.sendError(res, HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, 'Internal server error');
 };
