@@ -10,73 +10,73 @@ import {
   JOB_TYPES,
 } from '#/constants';
 
-async function up({ context: queryInterface }: { context: QueryInterface }): Promise<void> {
-  await queryInterface.createTable(JOB_SCHEMA_CONST.TABLE_NAME, {
-    [JOB_SCHEMA_CONST.FIELDS.ID]: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-      allowNull: false,
+const JOB_TABLE_DEFINITION = {
+  [JOB_SCHEMA_CONST.FIELDS.ID]: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+    allowNull: false,
+  },
+  [JOB_SCHEMA_CONST.FIELDS.PROJECT_ID]: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: PROJECT_SCHEMA_CONST.TABLE_NAME,
+      key: PROJECT_SCHEMA_CONST.FIELDS.ID,
     },
-    [JOB_SCHEMA_CONST.FIELDS.PROJECT_ID]: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: PROJECT_SCHEMA_CONST.TABLE_NAME,
-        key: PROJECT_SCHEMA_CONST.FIELDS.ID,
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
+  [JOB_SCHEMA_CONST.FIELDS.TYPE]: {
+    type: DataTypes.ENUM(...JOB_TYPE_VALUES),
+    allowNull: false,
+    defaultValue: JOB_TYPES.ZIP_COMPRESSION,
+  },
+  [JOB_SCHEMA_CONST.FIELDS.STATUS]: {
+    type: DataTypes.ENUM(...JOB_STATUS_VALUES),
+    allowNull: false,
+    defaultValue: JOB_STATUSES.PENDING,
+  },
+  [JOB_SCHEMA_CONST.FIELDS.PROGRESS]: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  [JOB_SCHEMA_CONST.FIELDS.OUTPUT_FILE_ID]: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: FILE_SCHEMA_CONST.TABLE_NAME,
+      key: FILE_SCHEMA_CONST.FIELDS.ID,
     },
-    [JOB_SCHEMA_CONST.FIELDS.TYPE]: {
-      type: DataTypes.ENUM(...JOB_TYPE_VALUES),
-      allowNull: false,
-      defaultValue: JOB_TYPES.ZIP_COMPRESSION,
-    },
-    [JOB_SCHEMA_CONST.FIELDS.STATUS]: {
-      type: DataTypes.ENUM(...JOB_STATUS_VALUES),
-      allowNull: false,
-      defaultValue: JOB_STATUSES.PENDING,
-    },
-    [JOB_SCHEMA_CONST.FIELDS.PROGRESS]: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
-    },
-    [JOB_SCHEMA_CONST.FIELDS.OUTPUT_FILE_ID]: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: FILE_SCHEMA_CONST.TABLE_NAME,
-        key: FILE_SCHEMA_CONST.FIELDS.ID,
-      },
-      onDelete: 'SET NULL',
-      onUpdate: 'CASCADE',
-    },
-    [JOB_SCHEMA_CONST.FIELDS.ERROR_MESSAGE]: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    [JOB_SCHEMA_CONST.FIELDS.STARTED_AT]: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    [JOB_SCHEMA_CONST.FIELDS.COMPLETED_AT]: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    [JOB_SCHEMA_CONST.FIELDS.CREATED_AT]: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: Sequelize.fn('NOW'),
-    },
-    [JOB_SCHEMA_CONST.FIELDS.UPDATED_AT]: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: Sequelize.fn('NOW'),
-    },
-  });
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  },
+  [JOB_SCHEMA_CONST.FIELDS.ERROR_MESSAGE]: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  [JOB_SCHEMA_CONST.FIELDS.STARTED_AT]: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  [JOB_SCHEMA_CONST.FIELDS.COMPLETED_AT]: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  [JOB_SCHEMA_CONST.FIELDS.CREATED_AT]: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: Sequelize.fn('NOW'),
+  },
+  [JOB_SCHEMA_CONST.FIELDS.UPDATED_AT]: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: Sequelize.fn('NOW'),
+  },
+};
 
+async function addJobIndexes(queryInterface: QueryInterface): Promise<void> {
   await queryInterface.addIndex(JOB_SCHEMA_CONST.TABLE_NAME, [JOB_SCHEMA_CONST.FIELDS.PROJECT_ID], {
     name: JOB_SCHEMA_CONST.INDEXES.PROJECT_ID,
   });
@@ -88,6 +88,11 @@ async function up({ context: queryInterface }: { context: QueryInterface }): Pro
     [JOB_SCHEMA_CONST.FIELDS.PROJECT_ID, JOB_SCHEMA_CONST.FIELDS.STATUS],
     { name: JOB_SCHEMA_CONST.INDEXES.PROJECT_STATUS },
   );
+}
+
+async function up({ context: queryInterface }: { context: QueryInterface }): Promise<void> {
+  await queryInterface.createTable(JOB_SCHEMA_CONST.TABLE_NAME, JOB_TABLE_DEFINITION);
+  await addJobIndexes(queryInterface);
 }
 
 async function down({ context: queryInterface }: { context: QueryInterface }): Promise<void> {
