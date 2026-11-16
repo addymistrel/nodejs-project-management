@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize';
 import { databaseConfig } from '#/config';
 import { logger } from '#/utils';
 
-const databaseClient = new Sequelize(databaseConfig.url, {
+const databaseOptions = {
   dialect: 'postgres',
   logging: databaseConfig.logging,
   dialectOptions: {
@@ -11,9 +11,17 @@ const databaseClient = new Sequelize(databaseConfig.url, {
       rejectUnauthorized: false,
     },
   },
-});
+} as const;
+
+const databaseClient = databaseConfig.url
+  ? new Sequelize(databaseConfig.url, databaseOptions)
+  : new Sequelize(databaseOptions);
 
 async function connectToDatabase(): Promise<void> {
+  if (!databaseConfig.url) {
+    throw new Error('DATABASE_URL is not configured');
+  }
+
   try {
     await databaseClient.authenticate();
     logger.info('Database connection established', {
