@@ -20,6 +20,12 @@ files are ordinary file records marked with `is_output = true`, so download
 ownership is checked through the same project-scoped file query as uploaded
 files.
 
+## Configuration
+
+Copy `.env.example` to `.env` and set `DATABASE_URL` to a reachable
+PostgreSQL database before starting the service. The server verifies the
+database connection before it begins listening.
+
 ## API documentation
 
 Start the service and open [Swagger UI](http://localhost:3000/api-docs/) to
