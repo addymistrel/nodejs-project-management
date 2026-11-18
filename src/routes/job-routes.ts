@@ -1,10 +1,22 @@
 import { Router } from 'express';
-import { createZipJobController, getJobController } from '#/controllers';
+import { createZipJobController, getJobController, listJobsController } from '#/controllers';
 import { validateRequest } from '#/middlewares';
 import { asyncHandler } from '#/utils';
-import { validateCreateZipJob, validateProjectId, validateJobId } from '#/validators';
+import {
+  validateCreateZipJob,
+  validateJobId,
+  validatePagination,
+  validateProjectId,
+} from '#/validators';
 
 const jobRouter = Router({ mergeParams: true });
+
+jobRouter.get(
+  '/',
+  validateRequest(validateProjectId),
+  validateRequest(validatePagination),
+  asyncHandler(listJobsController),
+);
 
 jobRouter.post(
   '/zip',

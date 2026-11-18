@@ -6,6 +6,7 @@ const projectService = {
   createProject: vi.fn(),
   deleteProject: vi.fn(),
   getProject: vi.fn(),
+  listProjects: vi.fn(),
   updateProject: vi.fn(),
 };
 
@@ -26,10 +27,27 @@ describe('Project API', () => {
     vi.clearAllMocks();
   });
 
+  it('lists projects with pagination', async () => {
+    projectService.listProjects.mockResolvedValue({
+      items: [project],
+      total: 1,
+      limit: 25,
+      pageNumber: 1,
+    });
+
+    const response = await request(app).get('/api/v1/projects?limit=25&pageNumber=1');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.items).toEqual([
+      expect.objectContaining({ id: 1, name: 'Website redesign' }),
+    ]);
+    expect(projectService.listProjects).toHaveBeenCalledWith(25, 1);
+  });
+
   it('creates a project and normalizes its input', async () => {
     projectService.createProject.mockResolvedValue(project);
 
-    const response = await request(app).post('/api/projects').send({
+    const response = await request(app).post('/api/v1/projects').send({
       name: '  Website redesign  ',
       description: '  Refresh the public website  ',
     });
@@ -56,7 +74,7 @@ describe('Project API', () => {
       jobsCount: 3,
     });
 
-    const response = await request(app).get('/api/projects/1');
+    const response = await request(app).get('/api/v1/projects/1');
 
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({
@@ -77,7 +95,7 @@ describe('Project API', () => {
       name: 'Updated website',
     });
 
-    const response = await request(app).patch('/api/projects/1').send({
+    const response = await request(app).patch('/api/v1/projects/1').send({
       name: ' Updated website ',
     });
 
@@ -91,7 +109,7 @@ describe('Project API', () => {
   it('deletes an existing project', async () => {
     projectService.deleteProject.mockResolvedValue(undefined);
 
-    const response = await request(app).delete('/api/projects/1');
+    const response = await request(app).delete('/api/v1/projects/1');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
@@ -109,14 +127,14 @@ describe('Project API', () => {
     ],
     [{ name: 'Valid name', unexpected: true }, 'Unsupported project field(s): unexpected'],
   ])('rejects invalid create payload %j', async (payload, message) => {
-    const response = await request(app).post('/api/projects').send(payload);
+    const response = await request(app).post('/api/v1/projects').send(payload);
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({ success: false, error: message });
     expect(projectService.createProject).not.toHaveBeenCalled();
   });
 
-  it.each(['/api/projects/0', '/api/projects/not-a-number'])(
+  it.each(['/api/v1/projects/0', '/api/v1/projects/not-a-number'])(
     'rejects invalid project id %s',
     async (url) => {
       const response = await request(app).get(url);
@@ -131,7 +149,7 @@ describe('Project API', () => {
   );
 
   it('rejects an empty update payload', async () => {
-    const response = await request(app).patch('/api/projects/1').send({});
+    const response = await request(app).patch('/api/v1/projects/1').send({});
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -144,7 +162,7 @@ describe('Project API', () => {
   it('returns 404 when the service cannot find a project', async () => {
     projectService.getProject.mockRejectedValue(new ProjectNotFoundException());
 
-    const response = await request(app).get('/api/projects/999');
+    const response = await request(app).get('/api/v1/projects/999');
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ success: false, error: 'Project not found' });

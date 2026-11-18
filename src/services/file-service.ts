@@ -1,7 +1,7 @@
 import { DEFAULT_MIME_TYPE } from '#/constants';
 import { FileModel } from '#/database';
 import * as repositoryFunctions from '#/repositories';
-import type { FileResponse } from '#/types';
+import type { FileResponse, PaginatedResponse } from '#/types';
 import {
   FileNotFoundException,
   ProjectNotFoundException,
@@ -54,16 +54,26 @@ class FileService extends BaseService<FileRepository> {
     }
   }
 
-  async listProjectFiles(projectId: number): Promise<FileResponse[]> {
+  async listProjectFiles(
+    projectId: number,
+    limit: number,
+    pageNumber: number,
+  ): Promise<PaginatedResponse<FileResponse>> {
     await this.assertProjectExists(projectId);
-    const files = await this.repository.findByProjectId(projectId);
+    const offset = (pageNumber - 1) * limit;
+    const result = await this.repository.findByProjectId(projectId, limit, offset);
     logger.info('Project files listed', {
       functionName: 'FileService.listProjectFiles',
       event: 'file.list.completed',
       projectId,
-      fileCount: files.length,
+      fileCount: result.rows.length,
     });
-    return files.map(toFileResponse);
+    return {
+      items: result.rows.map(toFileResponse),
+      total: result.count,
+      limit,
+      pageNumber,
+    };
   }
 
   async getProjectFile(projectId: number, fileId: number): Promise<FileModel> {

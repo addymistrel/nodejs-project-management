@@ -4,6 +4,7 @@ import type {
   CreateProjectRequest,
   ProjectDetailsResponse,
   ProjectResponse,
+  PaginatedResponse,
   UpdateProjectRequest,
 } from '#/types';
 import { ProjectNotFoundException, logger } from '#/utils';
@@ -13,6 +14,7 @@ interface ProjectRepository {
   create: typeof repositoryFunctions.createProjectRecord;
   findById: typeof repositoryFunctions.findProjectById;
   findDetailsById: typeof repositoryFunctions.findProjectDetailsById;
+  findMany: typeof repositoryFunctions.findProjects;
   update: typeof repositoryFunctions.updateProjectRecord;
   delete: typeof repositoryFunctions.deleteProjectRecord;
 }
@@ -21,6 +23,7 @@ const defaultProjectRepository: ProjectRepository = {
   create: (...args) => repositoryFunctions.createProjectRecord(...args),
   findById: (...args) => repositoryFunctions.findProjectById(...args),
   findDetailsById: (...args) => repositoryFunctions.findProjectDetailsById(...args),
+  findMany: (...args) => repositoryFunctions.findProjects(...args),
   update: (...args) => repositoryFunctions.updateProjectRecord(...args),
   delete: (...args) => repositoryFunctions.deleteProjectRecord(...args),
 };
@@ -38,6 +41,20 @@ class ProjectService extends BaseService<ProjectRepository> {
       projectId: project.id,
     });
     return toProjectResponse(project);
+  }
+
+  async listProjects(
+    limit: number,
+    pageNumber: number,
+  ): Promise<PaginatedResponse<ProjectResponse>> {
+    const offset = (pageNumber - 1) * limit;
+    const result = await this.repository.findMany(limit, offset);
+    return {
+      items: result.rows.map(toProjectResponse),
+      total: result.count,
+      limit,
+      pageNumber,
+    };
   }
 
   async getProject(projectId: number): Promise<ProjectDetailsResponse> {
@@ -110,7 +127,8 @@ const projectService = new ProjectService(defaultProjectRepository);
 const createProject = projectService.createProject.bind(projectService);
 const deleteProject = projectService.deleteProject.bind(projectService);
 const getProject = projectService.getProject.bind(projectService);
+const listProjects = projectService.listProjects.bind(projectService);
 const updateProject = projectService.updateProject.bind(projectService);
 
-export { ProjectService, createProject, deleteProject, getProject, updateProject };
+export { ProjectService, createProject, deleteProject, getProject, listProjects, updateProject };
 export type { ProjectRepository };

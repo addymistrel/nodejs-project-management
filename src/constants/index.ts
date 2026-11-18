@@ -17,6 +17,7 @@ import {
 } from '#/constants/job-constants.js';
 import { PROJECT_SCHEMA_CONST } from '#/constants/project-constants.js';
 import { HTTP_STATUS_CODE } from '#/constants/http-status-code.js';
+import { USER_SCHEMA_CONST } from '#/constants/user-constants.js';
 
 export {
   FILE_SCHEMA_CONST,
@@ -34,4 +35,5 @@ export {
   MAX_FILE_SIZE_ALLOWED,
   DEFAULT_MIME_TYPE,
   HTTP_STATUS_CODE,
+  USER_SCHEMA_CONST,
 };

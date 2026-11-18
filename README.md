@@ -26,6 +26,19 @@ Copy `.env.example` to `.env` and set `DATABASE_URL` to a reachable
 PostgreSQL database before starting the service. The server verifies the
 database connection before it begins listening.
 
+Set `JWT_SECRET` to a strong secret. Create an account through
+`POST /api/v1/auth/signup`, then authenticate with
+`POST /api/v1/auth/login`. Send the returned token as
+`Authorization: Bearer <token>` for protected API requests. The versioned API
+is available under `/api/v1`. Unversioned API routes are not exposed.
+
+Login and signup responses contain `token` and `refreshToken`. Renew both with
+`POST /api/v1/auth/refresh` using `{ "refreshToken": "<refresh token>" }`.
+
+Collection endpoints support `limit` (1-100, default 50) as the page size and
+`pageNumber` (default 1). Paginated responses contain `items`, `total`, `limit`,
+and `pageNumber`.
+
 ## API documentation
 
 Start the service and open [Swagger UI](http://localhost:3000/api-docs/) to

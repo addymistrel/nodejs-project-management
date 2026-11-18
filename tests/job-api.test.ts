@@ -5,6 +5,7 @@ import { JobNotFoundException } from '#/utils';
 const jobService = {
   createZipJob: vi.fn(),
   getZipJob: vi.fn(),
+  listZipJobs: vi.fn(),
 };
 
 vi.mock('#/services', () => jobService);
@@ -26,11 +27,26 @@ describe('Job API', () => {
     vi.clearAllMocks();
   });
 
+  it('lists jobs for a project with pagination', async () => {
+    jobService.listZipJobs.mockResolvedValue({
+      items: [job],
+      total: 1,
+      limit: 20,
+      pageNumber: 1,
+    });
+
+    const response = await request(app).get('/api/v1/projects/2/jobs?limit=20&pageNumber=1');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.items).toHaveLength(1);
+    expect(jobService.listZipJobs).toHaveBeenCalledWith(2, 20, 1);
+  });
+
   it('creates a ZIP job for valid file IDs', async () => {
     jobService.createZipJob.mockResolvedValue(job);
 
     const response = await request(app)
-      .post('/api/projects/2/jobs/zip')
+      .post('/api/v1/projects/2/jobs/zip')
       .send({
         fileIds: [1, 3],
       });
@@ -52,7 +68,7 @@ describe('Job API', () => {
   it('returns the current ZIP job status', async () => {
     jobService.getZipJob.mockResolvedValue(job);
 
-    const response = await request(app).get('/api/projects/2/jobs/7');
+    const response = await request(app).get('/api/v1/projects/2/jobs/7');
 
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({
@@ -73,7 +89,7 @@ describe('Job API', () => {
     [{ fileIds: [1, 1] }, 'fileIds must not contain duplicates'],
     [{ fileIds: [0] }, 'fileIds must contain positive integer IDs'],
   ])('rejects invalid ZIP job payload %j', async (payload, message) => {
-    const response = await request(app).post('/api/projects/2/jobs/zip').send(payload);
+    const response = await request(app).post('/api/v1/projects/2/jobs/zip').send(payload);
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({ success: false, error: message });
@@ -81,7 +97,7 @@ describe('Job API', () => {
   });
 
   it('rejects an invalid job id', async () => {
-    const response = await request(app).get('/api/projects/2/jobs/not-a-number');
+    const response = await request(app).get('/api/v1/projects/2/jobs/not-a-number');
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -94,7 +110,7 @@ describe('Job API', () => {
   it('returns 404 when the job does not exist', async () => {
     jobService.getZipJob.mockRejectedValue(new JobNotFoundException());
 
-    const response = await request(app).get('/api/projects/2/jobs/999');
+    const response = await request(app).get('/api/v1/projects/2/jobs/999');
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ success: false, error: 'Job not found' });

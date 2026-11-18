@@ -1,5 +1,6 @@
 import { validateRequest } from '#/middlewares/validate-request.js';
 import { errorHandler } from '#/middlewares/error-handler.js';
 import { fileUpload } from '#/middlewares/file-upload.js';
+import { jwtAuth } from '#/middlewares/jwt-auth.js';
 
-export { errorHandler, validateRequest, fileUpload };
+export { errorHandler, validateRequest, fileUpload, jwtAuth };

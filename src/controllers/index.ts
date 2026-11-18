@@ -3,6 +3,7 @@ import {
   updateProjectController,
   getProjectController,
   deleteProjectController,
+  listProjectsController,
 } from '#/controllers/project-controller.js';
 import {
   uploadFilesController,
@@ -10,7 +11,16 @@ import {
   deleteFileController,
   downloadFileController,
 } from '#/controllers/file-controller.js';
-import { createZipJobController, getJobController } from '#/controllers/job-controller.js';
+import {
+  createZipJobController,
+  getJobController,
+  listJobsController,
+} from '#/controllers/job-controller.js';
+import {
+  loginController,
+  refreshController,
+  signupController,
+} from '#/controllers/auth-controller.js';
 
 export {
   createProjectController,
@@ -23,4 +33,9 @@ export {
   downloadFileController,
   createZipJobController,
   getJobController,
+  listProjectsController,
+  listJobsController,
+  loginController,
+  signupController,
+  refreshController,
 };

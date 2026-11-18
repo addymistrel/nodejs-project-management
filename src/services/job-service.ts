@@ -1,6 +1,6 @@
 import * as repositoryFunctions from '#/repositories';
 import type { JobAttributes } from '#/database';
-import type { CreateZipJobRequest, JobResponse } from '#/types';
+import type { CreateZipJobRequest, JobResponse, PaginatedResponse } from '#/types';
 import {
   FileDoesNotBelongToProjectException,
   JobNotFoundException,
@@ -21,6 +21,7 @@ interface JobRepository {
   fail: typeof repositoryFunctions.failJob;
   findFilesByProjectAndId: typeof repositoryFunctions.findFilesByProjectAndId;
   findJobByProjectAndId: typeof repositoryFunctions.findJobByProjectAndId;
+  findJobsByProjectId: typeof repositoryFunctions.findJobsByProjectId;
   findProjectById: typeof repositoryFunctions.findProjectById;
   markProcessing: typeof repositoryFunctions.markJobProcessing;
   updateProgress: typeof repositoryFunctions.updateJobProgress;
@@ -33,6 +34,7 @@ const defaultJobRepository: JobRepository = {
   fail: (...args) => repositoryFunctions.failJob(...args),
   findFilesByProjectAndId: (...args) => repositoryFunctions.findFilesByProjectAndId(...args),
   findJobByProjectAndId: (...args) => repositoryFunctions.findJobByProjectAndId(...args),
+  findJobsByProjectId: (...args) => repositoryFunctions.findJobsByProjectId(...args),
   findProjectById: (...args) => repositoryFunctions.findProjectById(...args),
   markProcessing: (...args) => repositoryFunctions.markJobProcessing(...args),
   updateProgress: (...args) => repositoryFunctions.updateJobProgress(...args),
@@ -59,6 +61,22 @@ class JobService extends BaseService<JobRepository> {
     });
 
     return toJobResponse(job);
+  }
+
+  async listZipJobs(
+    projectId: number,
+    limit: number,
+    pageNumber: number,
+  ): Promise<PaginatedResponse<JobResponse>> {
+    await this.assertProject(projectId);
+    const offset = (pageNumber - 1) * limit;
+    const result = await this.repository.findJobsByProjectId(projectId, limit, offset);
+    return {
+      items: result.rows.map(toJobResponse),
+      total: result.count,
+      limit,
+      pageNumber,
+    };
   }
 
   async createZipJob(projectId: number, request: CreateZipJobRequest): Promise<JobResponse> {
@@ -262,6 +280,7 @@ const jobService = new JobService(defaultJobRepository);
 
 const createZipJob = jobService.createZipJob.bind(jobService);
 const getZipJob = jobService.getZipJob.bind(jobService);
+const listZipJobs = jobService.listZipJobs.bind(jobService);
 
-export { JobService, createZipJob, getZipJob };
+export { JobService, createZipJob, getZipJob, listZipJobs };
 export type { JobRepository };

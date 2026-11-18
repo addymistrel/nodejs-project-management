@@ -3,8 +3,8 @@ import swaggerUi from 'swagger-ui-express';
 
 import { initializeModelRelations } from '#/database';
 import { HTTP_STATUS_CODE } from '#/constants';
-import { errorHandler } from '#/middlewares';
-import { fileRouter, jobRouter, projectRouter } from '#/routes';
+import { jwtAuth, errorHandler } from '#/middlewares';
+import { authRouter, fileRouter, jobRouter, projectRouter } from '#/routes';
 import { swaggerDocument } from '#/docs';
 import { AppResponse } from '#/utils';
 
@@ -14,7 +14,7 @@ initializeModelRelations();
 
 app.use(express.json());
 
-app.get('/health', (_request, response) => {
+app.get('/api/v1/health', (_request, response) => {
   AppResponse.sendSuccess(response, HTTP_STATUS_CODE.OK, { status: 'ok' });
 });
 
@@ -23,9 +23,10 @@ app.get('/api-docs.json', (_request, response) => {
 });
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use('/api/projects', projectRouter);
-app.use('/api/projects/:projectId/files', fileRouter);
-app.use('/api/projects/:projectId/jobs', jobRouter);
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/projects', jwtAuth, projectRouter);
+app.use('/api/v1/projects/:projectId/files', jwtAuth, fileRouter);
+app.use('/api/v1/projects/:projectId/jobs', jwtAuth, jobRouter);
 
 app.use(errorHandler);
 

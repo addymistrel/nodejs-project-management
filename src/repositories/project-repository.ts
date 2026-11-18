@@ -18,6 +18,18 @@ async function findProjectById(projectId: number): Promise<ProjectModel | null> 
   return ProjectModel.findByPk(projectId);
 }
 
+async function findProjects(
+  limit: number,
+  offset: number,
+): Promise<{ rows: ProjectModel[]; count: number }> {
+  const result = await ProjectModel.findAndCountAll({
+    limit,
+    offset,
+    order: [['createdAt', 'DESC']],
+  });
+  return { rows: result.rows, count: result.count };
+}
+
 async function findProjectDetailsById(projectId: number): Promise<ProjectDetails | null> {
   const project = await findProjectById(projectId);
 
@@ -63,4 +75,5 @@ export {
   deleteProjectRecord,
   findProjectById,
   findProjectDetailsById,
+  findProjects,
 };

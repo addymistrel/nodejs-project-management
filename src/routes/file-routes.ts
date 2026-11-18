@@ -8,7 +8,7 @@ import {
 } from '#/controllers';
 import { fileUpload, validateRequest } from '#/middlewares';
 import { asyncHandler } from '#/utils';
-import { validateFileId, validateProjectId } from '#/validators';
+import { validateFileId, validatePagination, validateProjectId } from '#/validators';
 import { MAX_FILE_PER_UPLOAD } from '#/constants';
 
 const fileRouter = Router({
@@ -22,7 +22,12 @@ fileRouter.post(
   asyncHandler(uploadFilesController),
 );
 
-fileRouter.get('/', validateRequest(validateProjectId), asyncHandler(listFilesController));
+fileRouter.get(
+  '/',
+  validateRequest(validateProjectId),
+  validateRequest(validatePagination),
+  asyncHandler(listFilesController),
+);
 
 fileRouter.delete(
   '/:fileId',

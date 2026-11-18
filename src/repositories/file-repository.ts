@@ -26,13 +26,20 @@ async function createFileRecords(
   );
 }
 
-async function findFilesByProjectId(projectId: number): Promise<FileModel[]> {
-  return FileModel.findAll({
+async function findFilesByProjectId(
+  projectId: number,
+  limit: number,
+  offset: number,
+): Promise<{ rows: FileModel[]; count: number }> {
+  const result = await FileModel.findAndCountAll({
     where: {
       projectId,
     },
     order: [[FILE_SCHEMA_CONST.FIELDS.CREATED_AT, 'DESC']],
+    limit,
+    offset,
   });
+  return { rows: result.rows, count: result.count };
 }
 
 async function findFilesByProjectAndId(

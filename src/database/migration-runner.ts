@@ -1,6 +1,7 @@
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { SequelizeStorage, Umzug } from 'umzug';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { SequelizeStorage, Umzug, type MigrationParams, type RunnableMigration } from 'umzug';
+import type { QueryInterface } from 'sequelize';
 import { databaseClient } from '#/database/database-client.js';
 import { logger } from '#/utils';
 
@@ -10,6 +11,30 @@ const migrationGlob = path.join(currentDirectory, 'migrations/*.ts').replaceAll(
 const migrationRunner = new Umzug({
   migrations: {
     glob: migrationGlob,
+    resolve: (migration: MigrationParams<QueryInterface>): RunnableMigration<QueryInterface> => {
+      if (!migration.path) {
+        throw new Error(`Migration path is missing: ${migration.name}`);
+      }
+      const migrationPath = migration.path;
+
+      return {
+        name: migration.name,
+        up: async (_params: MigrationParams<QueryInterface>): Promise<unknown> => {
+          const loaded = await import(pathToFileURL(migrationPath).href);
+          const migrationDefinition = loaded.default ?? loaded;
+          return migrationDefinition.up({
+            context: databaseClient.getQueryInterface(),
+          });
+        },
+        down: async (_params: MigrationParams<QueryInterface>): Promise<unknown> => {
+          const loaded = await import(pathToFileURL(migrationPath).href);
+          const migrationDefinition = loaded.default ?? loaded;
+          return migrationDefinition.down({
+            context: databaseClient.getQueryInterface(),
+          });
+        },
+      };
+    },
   },
   context: databaseClient.getQueryInterface(),
   storage: new SequelizeStorage({ sequelize: databaseClient }),
@@ -18,7 +43,15 @@ const migrationRunner = new Umzug({
 
 async function runMigrationCommand(command: string): Promise<void> {
   if (command === 'up') {
-    await migrationRunner.up();
+    const target = process.argv[3];
+    if (target) {
+      const pendingMigrations = await migrationRunner.pending();
+      if (pendingMigrations.some((migration) => migration.name === target)) {
+        await migrationRunner.up({ to: target });
+      }
+    } else {
+      await migrationRunner.up();
+    }
     return;
   }
 

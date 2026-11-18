@@ -4,6 +4,8 @@ import { validateUpdateProject } from '#/validators/project/update-project-valid
 import { validateCreateZipJob } from '#/validators/job/create-zip-job-validator.js';
 import { validateJobId } from '#/validators/job/job-id-validator.js';
 import { validateFileId } from '#/validators/file/file-id-validator.js';
+import { validatePagination } from '#/validators/pagination-validator.js';
+import { validateLogin, validateRefresh, validateSignup } from '#/validators/auth-validator.js';
 
 export {
   validateProjectId,
@@ -12,4 +14,8 @@ export {
   validateCreateZipJob,
   validateJobId,
   validateFileId,
+  validatePagination,
+  validateLogin,
+  validateSignup,
+  validateRefresh,
 };

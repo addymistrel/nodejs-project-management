@@ -6,6 +6,8 @@ import { ProjectModel } from '#/database/models/project-model.js';
 import type { FileAttributes } from '#/database/models/file-model.js';
 import type { JobAttributes } from '#/database/models/job-model.js';
 import type { ProjectAttributes } from '#/database/models/project-model.js';
+import { UserModel } from '#/database/models/user-model.js';
+import type { UserAttributes } from '#/database/models/user-model.js';
 import { initializeJobFileRelations } from '#/database/relations/job-file-relations.js';
 import { initializeProjectFileRelations } from '#/database/relations/project-file-relations.js';
 import { initializeProjectJobRelations } from '#/database/relations/project-job-relations.js';
@@ -17,8 +19,9 @@ export {
   FileModel,
   JobModel,
   ProjectModel,
+  UserModel,
   initializeJobFileRelations,
   initializeProjectFileRelations,
   initializeProjectJobRelations,
 };
-export type { FileAttributes, JobAttributes, ProjectAttributes };
+export type { FileAttributes, JobAttributes, ProjectAttributes, UserAttributes };
