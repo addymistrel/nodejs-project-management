@@ -7,6 +7,7 @@ import {
 import { HTTP_STATUS_CODE } from '#/constants';
 import { AppResponse, resolveStoragePath } from '#/utils';
 import { Request, Response } from 'express';
+import { getPaginationQuery } from '#/utils';
 
 function getProjectId(req: Request): number {
   return Number(req.params.projectId);
@@ -35,7 +36,8 @@ async function uploadFilesController(req: Request, res: Response): Promise<void>
 
 async function listFilesController(req: Request, res: Response): Promise<void> {
   const projectId = getProjectId(req);
-  const files = await listProjectFiles(projectId);
+  const pagination = getPaginationQuery(req);
+  const files = await listProjectFiles(projectId, pagination.limit, pagination.pageNumber);
 
   AppResponse.sendSuccess(res, HTTP_STATUS_CODE.OK, files);
 }

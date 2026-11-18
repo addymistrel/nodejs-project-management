@@ -95,19 +95,24 @@ describe('File service', () => {
 
   it('lists project files as API responses', async () => {
     repository.findProjectById.mockResolvedValue(project);
-    repository.findFilesByProjectId.mockResolvedValue([fileRecord]);
+    repository.findFilesByProjectId.mockResolvedValue({ rows: [fileRecord], count: 1 });
 
-    await expect(listProjectFiles(2)).resolves.toEqual([
-      {
-        fileId: 1,
-        projectId: 2,
-        name: 'requirements.pdf',
-        size: 1024,
-        type: 'application/pdf',
-        uploadedAt: fileRecord.createdAt,
-        isOutput: false,
-      },
-    ]);
+    await expect(listProjectFiles(2, 50, 1)).resolves.toEqual({
+      items: [
+        {
+          fileId: 1,
+          projectId: 2,
+          name: 'requirements.pdf',
+          size: 1024,
+          type: 'application/pdf',
+          uploadedAt: fileRecord.createdAt,
+          isOutput: false,
+        },
+      ],
+      total: 1,
+      limit: 50,
+      pageNumber: 1,
+    });
   });
 
   it('gets a file belonging to the project', async () => {

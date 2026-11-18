@@ -29,27 +29,37 @@ describe('File API', () => {
   });
 
   it('lists files for a valid project', async () => {
-    fileService.listProjectFiles.mockResolvedValue([file]);
+    fileService.listProjectFiles.mockResolvedValue({
+      items: [file],
+      total: 1,
+      limit: 50,
+      pageNumber: 1,
+    });
 
-    const response = await request(app).get('/api/projects/2/files');
+    const response = await request(app).get('/api/v1/projects/2/files?limit=50&pageNumber=1');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
       success: true,
-      data: [
-        {
-          ...file,
-          uploadedAt: file.uploadedAt.toISOString(),
-        },
-      ],
+      data: {
+        items: [
+          {
+            ...file,
+            uploadedAt: file.uploadedAt.toISOString(),
+          },
+        ],
+        total: 1,
+        limit: 50,
+        pageNumber: 1,
+      },
     });
-    expect(fileService.listProjectFiles).toHaveBeenCalledWith(2);
+    expect(fileService.listProjectFiles).toHaveBeenCalledWith(2, 50, 1);
   });
 
   it('rejects an upload when no files are provided', async () => {
     fileService.uploadProjectFiles.mockRejectedValue(new RequiredFileException());
 
-    const response = await request(app).post('/api/projects/2/files');
+    const response = await request(app).post('/api/v1/projects/2/files');
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -62,7 +72,7 @@ describe('File API', () => {
   it('deletes a file belonging to a project', async () => {
     fileService.deleteProjectFile.mockResolvedValue(undefined);
 
-    const response = await request(app).delete('/api/projects/2/files/1');
+    const response = await request(app).delete('/api/v1/projects/2/files/1');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
@@ -73,7 +83,7 @@ describe('File API', () => {
   });
 
   it('rejects invalid project and file ids', async () => {
-    const response = await request(app).delete('/api/projects/0/files/not-a-number');
+    const response = await request(app).delete('/api/v1/projects/0/files/not-a-number');
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -83,10 +93,18 @@ describe('File API', () => {
     expect(fileService.deleteProjectFile).not.toHaveBeenCalled();
   });
 
+  it('rejects pagination limits above the maximum', async () => {
+    const response = await request(app).get('/api/v1/projects/2/files?limit=101');
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('limit must be between 1 and 100');
+    expect(fileService.listProjectFiles).not.toHaveBeenCalled();
+  });
+
   it('returns 404 when a file does not exist', async () => {
     fileService.deleteProjectFile.mockRejectedValue(new FileNotFoundException());
 
-    const response = await request(app).delete('/api/projects/2/files/999');
+    const response = await request(app).delete('/api/v1/projects/2/files/999');
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ success: false, error: 'File not found' });

@@ -7,8 +7,8 @@ const swaggerDocument = {
   },
   servers: [
     {
-      url: '/',
-      description: 'Current server',
+      url: '/api/v1',
+      description: 'Version 1 API',
     },
   ],
   tags: [
@@ -24,8 +24,98 @@ const swaggerDocument = {
       name: 'Jobs',
       description: 'Background processing operations',
     },
+    {
+      name: 'Auth',
+      description: 'User authentication operations',
+    },
+  ],
+  security: [
+    {
+      BearerAuth: [],
+    },
   ],
   paths: {
+    '/auth/signup': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Create a user account',
+        security: [],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name', 'email', 'password'],
+                properties: {
+                  name: { type: 'string', minLength: 1, maxLength: 150 },
+                  email: { type: 'string', format: 'email' },
+                  password: { type: 'string', minLength: 8, maxLength: 128 },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'User created and JWT issued' },
+          '409': { $ref: '#/components/responses/BadRequest' },
+        },
+      },
+    },
+    '/auth/login': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Authenticate and receive a JWT',
+        security: [],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email', 'password'],
+                properties: {
+                  email: { type: 'string', format: 'email' },
+                  password: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'JWT issued' },
+          '401': { $ref: '#/components/responses/BadRequest' },
+        },
+      },
+    },
+    '/auth/refresh': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Refresh JWT tokens',
+        security: [],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['refreshToken'],
+                properties: {
+                  refreshToken: {
+                    type: 'string',
+                    description: 'Valid refresh token',
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'New access and refresh tokens issued' },
+          '401': { $ref: '#/components/responses/BadRequest' },
+        },
+      },
+    },
     '/health': {
       get: {
         tags: ['Projects'],
@@ -61,7 +151,18 @@ const swaggerDocument = {
         },
       },
     },
-    '/api/projects': {
+    '/projects': {
+      get: {
+        tags: ['Projects'],
+        summary: 'List projects',
+        parameters: [
+          { $ref: '#/components/parameters/Limit' },
+          { $ref: '#/components/parameters/PageNumber' },
+        ],
+        responses: {
+          '200': { description: 'Paginated projects' },
+        },
+      },
       post: {
         tags: ['Projects'],
         summary: 'Create a project',
@@ -92,7 +193,7 @@ const swaggerDocument = {
         },
       },
     },
-    '/api/projects/{projectId}': {
+    '/projects/{projectId}': {
       parameters: [
         {
           $ref: '#/components/parameters/ProjectId',
@@ -169,7 +270,7 @@ const swaggerDocument = {
         },
       },
     },
-    '/api/projects/{projectId}/files': {
+    '/projects/{projectId}/files': {
       parameters: [
         {
           $ref: '#/components/parameters/ProjectId',
@@ -232,6 +333,10 @@ const swaggerDocument = {
       get: {
         tags: ['Files'],
         summary: 'List files in a project',
+        parameters: [
+          { $ref: '#/components/parameters/Limit' },
+          { $ref: '#/components/parameters/PageNumber' },
+        ],
         responses: {
           '200': {
             description: 'Project files',
@@ -249,7 +354,7 @@ const swaggerDocument = {
         },
       },
     },
-    '/api/projects/{projectId}/files/{fileId}': {
+    '/projects/{projectId}/files/{fileId}': {
       parameters: [
         {
           $ref: '#/components/parameters/ProjectId',
@@ -278,7 +383,7 @@ const swaggerDocument = {
         },
       },
     },
-    '/api/projects/{projectId}/files/{fileId}/download': {
+    '/projects/{projectId}/files/{fileId}/download': {
       parameters: [
         {
           $ref: '#/components/parameters/ProjectId',
@@ -308,7 +413,7 @@ const swaggerDocument = {
         },
       },
     },
-    '/api/projects/{projectId}/jobs/zip': {
+    '/projects/{projectId}/jobs/zip': {
       parameters: [
         {
           $ref: '#/components/parameters/ProjectId',
@@ -348,7 +453,21 @@ const swaggerDocument = {
         },
       },
     },
-    '/api/projects/{projectId}/jobs/{jobId}': {
+    '/projects/{projectId}/jobs': {
+      parameters: [{ $ref: '#/components/parameters/ProjectId' }],
+      get: {
+        tags: ['Jobs'],
+        summary: 'List project jobs',
+        parameters: [
+          { $ref: '#/components/parameters/Limit' },
+          { $ref: '#/components/parameters/PageNumber' },
+        ],
+        responses: {
+          '200': { description: 'Paginated project jobs' },
+        },
+      },
+    },
+    '/projects/{projectId}/jobs/{jobId}': {
       parameters: [
         {
           $ref: '#/components/parameters/ProjectId',
@@ -379,7 +498,35 @@ const swaggerDocument = {
     },
   },
   components: {
+    securitySchemes: {
+      BearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+    },
     parameters: {
+      Limit: {
+        name: 'limit',
+        in: 'query',
+        description: 'Page size: maximum number of items to return',
+        schema: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 100,
+          default: 50,
+        },
+      },
+      PageNumber: {
+        name: 'pageNumber',
+        in: 'query',
+        description: 'Page number, starting at 1',
+        schema: {
+          type: 'integer',
+          minimum: 1,
+          default: 1,
+        },
+      },
       ProjectId: {
         name: 'projectId',
         in: 'path',
@@ -668,9 +815,28 @@ const swaggerDocument = {
             example: true,
           },
           data: {
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/File',
+            type: 'object',
+            required: ['items', 'total', 'limit', 'pageNumber'],
+            properties: {
+              items: {
+                type: 'array',
+                items: {
+                  $ref: '#/components/schemas/File',
+                },
+              },
+              total: {
+                type: 'integer',
+                minimum: 0,
+              },
+              limit: {
+                type: 'integer',
+                minimum: 1,
+                maximum: 100,
+              },
+              pageNumber: {
+                type: 'integer',
+                minimum: 1,
+              },
             },
           },
         },

@@ -3,13 +3,21 @@ import {
   createProjectController,
   deleteProjectController,
   getProjectController,
+  listProjectsController,
   updateProjectController,
 } from '#/controllers';
 import { validateRequest } from '#/middlewares';
 import { asyncHandler } from '#/utils';
-import { validateCreateProject, validateProjectId, validateUpdateProject } from '#/validators';
+import {
+  validateCreateProject,
+  validatePagination,
+  validateProjectId,
+  validateUpdateProject,
+} from '#/validators';
 
 const projectRouter = Router();
+
+projectRouter.get('/', validateRequest(validatePagination), asyncHandler(listProjectsController));
 
 projectRouter.post(
   '/',

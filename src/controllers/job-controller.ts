@@ -1,7 +1,8 @@
 import type { Request, Response } from 'express';
 import { HTTP_STATUS_CODE } from '#/constants';
-import { createZipJob, getZipJob } from '#/services';
+import { createZipJob, getZipJob, listZipJobs } from '#/services';
 import { AppResponse } from '#/utils';
+import { getPaginationQuery } from '#/utils';
 
 function getProjectId(req: Request): number {
   return Number(req.params.projectId);
@@ -21,4 +22,12 @@ async function getJobController(req: Request, res: Response): Promise<void> {
   AppResponse.sendSuccess(res, HTTP_STATUS_CODE.OK, job);
 }
 
-export { createZipJobController, getJobController };
+async function listJobsController(req: Request, res: Response): Promise<void> {
+  const projectId = getProjectId(req);
+  const pagination = getPaginationQuery(req);
+  const jobs = await listZipJobs(projectId, pagination.limit, pagination.pageNumber);
+
+  AppResponse.sendSuccess(res, HTTP_STATUS_CODE.OK, jobs);
+}
+
+export { createZipJobController, getJobController, listJobsController };

@@ -9,6 +9,7 @@ import type { RequestValidator, ValidationResult } from '#/types/validation-type
 import type { FileResponse } from '#/types/file-types.js';
 import type { CreateZipJobRequest, JobResponse } from '#/types/job-types.js';
 import type { ApiErrorResponse, ApiSuccessResponse } from '#/types/api-response-types.js';
+import type { PaginatedResponse, PaginationQuery } from '#/types/pagination-types.js';
 
 export type {
   JobType,
@@ -24,4 +25,6 @@ export type {
   JobResponse,
   ApiErrorResponse,
   ApiSuccessResponse,
+  PaginatedResponse,
+  PaginationQuery,
 };

@@ -5,3 +5,7 @@ export { InvalidRequestException } from '#/utils/exceptions/invalid-request-exce
 export { JobNotFoundException } from '#/utils/exceptions/job-not-found-exception.js';
 export { ProjectNotFoundException } from '#/utils/exceptions/project-not-found-exception.js';
 export { RequiredFileException } from '#/utils/exceptions/required-file-exception.js';
+export {
+  EmailAlreadyExistsException,
+  InvalidCredentialsException,
+} from '#/utils/exceptions/auth-exception.js';

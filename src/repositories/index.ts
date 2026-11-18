@@ -4,6 +4,7 @@ import {
   deleteProjectRecord,
   findProjectById,
   findProjectDetailsById,
+  findProjects,
 } from '#/repositories/project-repository.js';
 import {
   createFileRecords,
@@ -19,7 +20,9 @@ import {
   findJobByProjectAndId,
   markJobProcessing,
   updateJobProgress,
+  findJobsByProjectId,
 } from '#/repositories/job-repository.js';
+import { createUserRecord, findUserByEmail, findUserById } from '#/repositories/user-repository.js';
 
 export {
   createProjectRecord,
@@ -37,5 +40,10 @@ export {
   findJobByProjectAndId,
   markJobProcessing,
   updateJobProgress,
+  findJobsByProjectId,
+  findProjects,
+  createUserRecord,
+  findUserByEmail,
+  findUserById,
 };
 export type { CreateFileRecordInput };

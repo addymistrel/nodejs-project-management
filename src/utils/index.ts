@@ -9,6 +9,8 @@ import {
   JobNotFoundException,
   ProjectNotFoundException,
   RequiredFileException,
+  EmailAlreadyExistsException,
+  InvalidCredentialsException,
 } from '#/utils/exceptions/index.js';
 import {
   ensureProjectFilesDirectory,
@@ -19,6 +21,7 @@ import {
   resolveStoragePath,
   getCleanFileName,
 } from '#/utils/file-storage.js';
+import { getPaginationQuery } from '#/utils/pagination.js';
 
 export {
   AppExceptionBase,
@@ -38,4 +41,7 @@ export {
   JobNotFoundException,
   ProjectNotFoundException,
   RequiredFileException,
+  EmailAlreadyExistsException,
+  InvalidCredentialsException,
+  getPaginationQuery,
 };

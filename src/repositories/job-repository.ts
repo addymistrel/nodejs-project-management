@@ -19,6 +19,20 @@ async function findJobByProjectAndId(projectId: number, jobId: number): Promise<
   return JobModel.findOne({ where: { id: jobId, projectId } });
 }
 
+async function findJobsByProjectId(
+  projectId: number,
+  limit: number,
+  offset: number,
+): Promise<{ rows: JobModel[]; count: number }> {
+  const result = await JobModel.findAndCountAll({
+    where: { projectId },
+    order: [['createdAt', 'DESC']],
+    limit,
+    offset,
+  });
+  return { rows: result.rows, count: result.count };
+}
+
 async function markJobProcessing(jobId: number): Promise<void> {
   await JobModel.update(
     { status: JOB_STATUSES.PROCESSING, startedAt: new Date(), progress: 0 },
@@ -64,6 +78,7 @@ export {
   createZipJobRecord,
   failJob,
   findJobByProjectAndId,
+  findJobsByProjectId,
   markJobProcessing,
   updateJobProgress,
 };
