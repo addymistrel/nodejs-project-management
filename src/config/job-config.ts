@@ -1,8 +1,8 @@
 import 'dotenv/config';
-import { parsePositiveInteger } from '#/utils';
+import { environmentConfig } from '#/config/environment-config.js';
 
 const jobConfig = {
-  workerPoolSize: parsePositiveInteger(process.env.JOB_WORKER_POOL_SIZE, 2),
+  workerPoolSize: environmentConfig.workerPoolSize,
 };
 
 export { jobConfig };

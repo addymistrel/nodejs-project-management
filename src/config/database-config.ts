@@ -1,26 +1,34 @@
-import 'dotenv/config';
-import { logger, parsePositiveInteger } from '#/utils';
+import { environmentConfig } from '#/config/environment-config.js';
+import { logger } from '#/utils';
 
-const databaseUrl = process.env.DATABASE_URL;
-const nodeEnvironment = process.env.NODE_ENV;
-const sslEnabled = process.env.DATABASE_SSL === 'true';
-const rejectUnauthorized = process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false';
+const databaseUrl = environmentConfig.databaseUrl;
+const nodeEnvironment = environmentConfig.nodeEnvironment;
 const sslEnabledState = {
   require: true,
-  rejectUnauthorized,
+  rejectUnauthorized: environmentConfig.databaseSslRejectUnauthorized,
+};
+const testDatabaseConfig = {
+  database: 'test',
+  username: 'test',
+  password: 'test',
+  host: '127.0.0.1',
+  port: 5432,
+};
+const runtimeDatabaseConfig = {
+  isTestEnvironment: environmentConfig.isTestEnvironment,
+  hasDatabaseUrl: typeof databaseUrl === 'string' && databaseUrl.trim().length > 0,
 };
 
 const databaseConfig = {
   url: databaseUrl,
   dialect: 'postgres' as const,
   logging: nodeEnvironment === 'development' ? logger.log.bind(logger) : false,
-  ssl: sslEnabled ? sslEnabledState : undefined,
+  ssl: environmentConfig.databaseSsl ? sslEnabledState : undefined,
   pool: {
-    max: parsePositiveInteger(process.env.DATABASE_POOL_MAX, 10),
-    min: parsePositiveInteger(process.env.DATABASE_POOL_MIN, 2),
-    acquire: parsePositiveInteger(process.env.DATABASE_POOL_ACQUIRE, 30_000),
-    idle: parsePositiveInteger(process.env.DATABASE_POOL_IDLE, 10_000),
+    ...environmentConfig.databasePool,
   },
+  test: testDatabaseConfig,
+  runtime: runtimeDatabaseConfig,
 };
 
 export { databaseConfig };

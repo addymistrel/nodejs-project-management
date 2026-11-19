@@ -1,3 +1,5 @@
+import { environmentConfig } from '#/config';
+
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
 const LOG_LEVELS: Record<LogLevel, number> = {
@@ -8,10 +10,10 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 };
 
 function getConfiguredLogLevel(): LogLevel {
-  if (process.env.LOG_LEVEL && process.env.LOG_LEVEL in LOG_LEVELS) {
-    return process.env.LOG_LEVEL as LogLevel;
+  if (environmentConfig.logLevel && environmentConfig.logLevel in LOG_LEVELS) {
+    return environmentConfig.logLevel as LogLevel;
   }
-  return process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+  return environmentConfig.nodeEnvironment === 'production' ? 'info' : 'debug';
 }
 
 function safeStringify(value: unknown): string {

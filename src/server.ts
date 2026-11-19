@@ -2,13 +2,15 @@ import { app } from './app.js';
 import { connectToDatabase, disconnectDatabase } from '#/database';
 import { logger } from '#/utils';
 import type { Server } from 'http';
+import { environmentConfig, validateEnvironment } from '#/config';
 
-const port = Number(process.env.PORT ?? 3000);
+const port = environmentConfig.port;
 let httpServer: Server | undefined;
 let shuttingDown = false;
 
 async function startServer(): Promise<void> {
   try {
+    validateEnvironment(['databaseUrl', 'jwtSecret', 'jwtRefreshSecret']);
     await connectToDatabase();
     httpServer = app.listen(port, () => {
       logger.info('Server listening', {

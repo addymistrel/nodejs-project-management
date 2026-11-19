@@ -89,11 +89,15 @@ async function createZip({ outputPath, files }: ZipWorkerData): Promise<void> {
   send({ type: 'completed', size: outputStats.size });
 }
 
-createZip(workerData as ZipWorkerData).catch((error: unknown) => {
-  const outputPath = (workerData as ZipWorkerData).outputPath;
-  void unlink(outputPath).catch(() => undefined);
-  send({
-    type: 'failed',
-    error: error instanceof Error ? error.message : 'ZIP creation failed',
+if (parentPort && workerData) {
+  createZip(workerData as ZipWorkerData).catch((error: unknown) => {
+    const outputPath = (workerData as ZipWorkerData).outputPath;
+    void unlink(outputPath).catch(() => undefined);
+    send({
+      type: 'failed',
+      error: error instanceof Error ? error.message : 'ZIP creation failed',
+    });
   });
-});
+}
+
+export { createZip };

@@ -22,6 +22,17 @@ files.
 
 ## Configuration
 
+## Developer quickstart
+
+1. Install Node.js 20 or later and PostgreSQL.
+2. Run `npm install`.
+3. Copy `.env.example` to `.env`.
+4. Set `DATABASE_URL`, `PORT`, `UPLOADS_DIR`, `JWT_SECRET`, and
+   `JWT_REFRESH_SECRET`.
+5. Run `npm run db:migrate` to create the database tables.
+6. Start development mode with `npm run dev`.
+7. Run `npm test` and `npm run test:coverage` to execute tests and coverage.
+
 Copy `.env.example` to `.env` and set `DATABASE_URL` to a reachable
 PostgreSQL database before starting the service. The server verifies the
 database connection before it begins listening.
