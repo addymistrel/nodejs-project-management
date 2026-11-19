@@ -1,4 +1,8 @@
 import express from 'express';
+import compression from 'compression';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 
 import { initializeModelRelations } from '#/database';
@@ -12,16 +16,34 @@ const app = express();
 
 initializeModelRelations();
 
+app.disable('x-powered-by');
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN?.split(',').map((origin) => origin.trim()) ?? false,
+  }),
+);
+app.use(compression());
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+  }),
+);
 app.use(express.json());
 
 app.get('/api/v1/health', (_request, response) => {
   AppResponse.sendSuccess(response, HTTP_STATUS_CODE.OK, { status: 'ok' });
 });
 
-app.get('/api-docs.json', (_request, response) => {
-  response.json(swaggerDocument);
-});
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api-docs.json', (_request, response) => {
+    response.json(swaggerDocument);
+  });
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+}
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/projects', jwtAuth, projectRouter);

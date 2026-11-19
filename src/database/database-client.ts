@@ -11,12 +11,7 @@ const databaseOptions = {
     acquire: 30_000,
     idle: 10_000,
   },
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
+  dialectOptions: databaseConfig.ssl ? { ssl: databaseConfig.ssl } : undefined,
 } as const;
 
 const databaseClient = databaseConfig.url
