@@ -6,6 +6,7 @@ const repository = vi.hoisted(() => ({
   deleteProjectRecord: vi.fn(),
   findProjectById: vi.fn(),
   findProjectDetailsById: vi.fn(),
+  findProjectFiles: vi.fn(),
   updateProjectRecord: vi.fn(),
 }));
 
@@ -97,6 +98,7 @@ describe('Project service', () => {
 
   it('deletes an existing project', async () => {
     repository.findProjectById.mockResolvedValue(project);
+    repository.findProjectFiles.mockResolvedValue([]);
     repository.deleteProjectRecord.mockResolvedValue(undefined);
 
     await expect(deleteProject(project.id)).resolves.toBeUndefined();

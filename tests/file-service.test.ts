@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AppExceptionBase } from '#/utils';
+import { AppExceptionBase, getUniqueFileName } from '#/utils';
 import path from 'path';
 
 const repository = vi.hoisted(() => ({
@@ -23,7 +23,6 @@ const fileRecord = {
   storagePath: path.join('uploads', '2', 'files', 'requirements.pdf'),
   size: 1024,
   mimeType: 'application/pdf',
-  checksum: null,
   isOutput: false,
   createdAt: new Date('2026-01-01T00:00:00.000Z'),
   updatedAt: new Date('2026-01-01T00:00:00.000Z'),
@@ -41,6 +40,16 @@ const uploadedFile: Express.Multer.File = {
   buffer: Buffer.from('file'),
   stream: undefined as never,
 };
+
+describe('Unique upload names', () => {
+  it('creates different disk names for the same original filename', () => {
+    const firstName = getUniqueFileName('requirements.pdf');
+    const secondName = getUniqueFileName('requirements.pdf');
+
+    expect(firstName).not.toBe(secondName);
+    expect(firstName).toMatch(/^requirements-.+\.pdf$/);
+  });
+});
 
 describe('File service', () => {
   beforeEach(() => {

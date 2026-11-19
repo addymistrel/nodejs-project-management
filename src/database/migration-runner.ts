@@ -6,7 +6,7 @@ import { databaseClient } from '#/database/database-client.js';
 import { logger } from '#/utils';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
-const migrationGlob = path.join(currentDirectory, 'migrations/*.ts').replaceAll('\\', '/');
+const migrationGlob = path.join(currentDirectory, 'migrations/*.{ts,js}').replaceAll('\\', '/');
 
 const migrationRunner = new Umzug({
   migrations: {
@@ -16,9 +16,10 @@ const migrationRunner = new Umzug({
         throw new Error(`Migration path is missing: ${migration.name}`);
       }
       const migrationPath = migration.path;
+      const migrationName = migration.name.replace(/\.js$/, '.ts');
 
       return {
-        name: migration.name,
+        name: migrationName,
         up: async (_params: MigrationParams<QueryInterface>): Promise<unknown> => {
           const loaded = await import(pathToFileURL(migrationPath).href);
           const migrationDefinition = loaded.default ?? loaded;

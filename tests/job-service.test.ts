@@ -5,6 +5,8 @@ const repository = vi.hoisted(() => ({
   createFileRecords: vi.fn(),
   createZipJobRecord: vi.fn(),
   findFilesByProjectAndId: vi.fn(),
+  findFilesByProjectAndIds: vi.fn(),
+  saveCompletedZipJob: vi.fn(),
   findJobByProjectAndId: vi.fn(),
   findProjectById: vi.fn(),
   markJobProcessing: vi.fn(),
@@ -50,6 +52,7 @@ describe('Job service', () => {
   it('creates a ZIP job after validating project files', async () => {
     repository.findProjectById.mockResolvedValue(project);
     repository.findFilesByProjectAndId.mockResolvedValue(file);
+    repository.findFilesByProjectAndIds.mockResolvedValue([file]);
     repository.createZipJobRecord.mockResolvedValue(job);
     repository.markJobProcessing.mockResolvedValue(undefined);
     job.reload.mockResolvedValue(job);
@@ -98,6 +101,7 @@ describe('Job service', () => {
   it('rejects creation when a file does not belong to the project', async () => {
     repository.findProjectById.mockResolvedValue(project);
     repository.findFilesByProjectAndId.mockResolvedValue(null);
+    repository.findFilesByProjectAndIds.mockResolvedValue([]);
 
     await expect(createZipJob(2, { fileIds: [999] })).rejects.toMatchObject({
       message: 'File does not belong to this project',

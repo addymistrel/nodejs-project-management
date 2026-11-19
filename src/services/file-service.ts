@@ -10,7 +10,7 @@ import {
   logger,
   resolveStoragePath,
 } from '#/utils';
-import { unlink } from 'fs/promises';
+import { rename, unlink } from 'fs/promises';
 import { BaseService } from '#/services/base-service.js';
 
 interface FileRepository {
@@ -90,14 +90,26 @@ class FileService extends BaseService<FileRepository> {
   async deleteProjectFile(projectId: number, fileId: number): Promise<void> {
     const file = await this.getProjectFile(projectId, fileId);
     const absPath = resolveStoragePath(file.storagePath);
+    const deletionPath = `${absPath}.deleting-${process.pid}-${Date.now()}`;
 
-    await unlink(absPath).catch((error: NodeJS.ErrnoException) => {
+    await rename(absPath, deletionPath).catch((error: NodeJS.ErrnoException) => {
       if (error.code !== 'ENOENT') {
         throw error;
       }
     });
 
-    await this.repository.delete(file);
+    try {
+      await this.repository.delete(file);
+    } catch (error: unknown) {
+      await rename(deletionPath, absPath).catch(() => undefined);
+      throw error;
+    }
+
+    await unlink(deletionPath).catch((error: NodeJS.ErrnoException) => {
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+    });
     logger.info('Project file deleted', {
       functionName: 'FileService.deleteProjectFile',
       event: 'file.delete.completed',

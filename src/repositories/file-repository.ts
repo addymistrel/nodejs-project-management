@@ -1,5 +1,6 @@
 import { FILE_SCHEMA_CONST } from '#/constants';
-import { FileModel } from '#/database';
+import { databaseClient, FileModel } from '#/database';
+import { Op } from 'sequelize';
 
 interface CreateFileRecordInput {
   name: string;
@@ -7,6 +8,7 @@ interface CreateFileRecordInput {
   size: number;
   mimeType: string;
   isOutput?: boolean;
+  checksum?: string | null;
 }
 
 async function createFileRecords(
@@ -20,7 +22,7 @@ async function createFileRecords(
       storagePath: file.storagePath,
       size: file.size,
       mimeType: file.mimeType,
-      checksum: null,
+      checksum: file.checksum ?? null,
       isOutput: file.isOutput ?? false,
     })),
   );
@@ -54,9 +56,33 @@ async function findFilesByProjectAndId(
   });
 }
 
-async function deleteFileRecord(file: FileModel): Promise<void> {
-  await file.destroy();
+async function findFilesByProjectAndIds(
+  projectId: number,
+  fileIds: number[],
+): Promise<FileModel[]> {
+  if (fileIds.length === 0) {
+    return [];
+  }
+
+  return FileModel.findAll({
+    where: {
+      projectId,
+      id: { [Op.in]: [...new Set(fileIds)] },
+    },
+  });
 }
 
-export { createFileRecords, deleteFileRecord, findFilesByProjectAndId, findFilesByProjectId };
+async function deleteFileRecord(file: FileModel): Promise<void> {
+  await databaseClient.transaction(async (transaction) => {
+    await file.destroy({ transaction });
+  });
+}
+
+export {
+  createFileRecords,
+  deleteFileRecord,
+  findFilesByProjectAndId,
+  findFilesByProjectAndIds,
+  findFilesByProjectId,
+};
 export type { CreateFileRecordInput };

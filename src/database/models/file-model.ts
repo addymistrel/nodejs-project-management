@@ -55,6 +55,9 @@ FileModel.init(
       validate: {
         min: 0,
       },
+      get(): number {
+        return Number(this.getDataValue('size'));
+      },
     },
     mimeType: {
       type: DataTypes.STRING(255),

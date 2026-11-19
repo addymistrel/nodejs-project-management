@@ -20,6 +20,7 @@ import {
   getStoragePath,
   resolveStoragePath,
   getCleanFileName,
+  getUniqueFileName,
 } from '#/utils/file-storage.js';
 import { getPaginationQuery } from '#/utils/pagination.js';
 
@@ -35,6 +36,7 @@ export {
   getStoragePath,
   resolveStoragePath,
   getCleanFileName,
+  getUniqueFileName,
   FileDoesNotBelongToProjectException,
   FileNotFoundException,
   InvalidRequestException,

@@ -97,6 +97,9 @@ async function up({ context: queryInterface }: { context: QueryInterface }): Pro
 
 async function down({ context: queryInterface }: { context: QueryInterface }): Promise<void> {
   await queryInterface.dropTable(JOB_SCHEMA_CONST.TABLE_NAME);
+  await queryInterface.sequelize.query(
+    'DROP TYPE IF EXISTS "enum_jobs_type"; DROP TYPE IF EXISTS "enum_jobs_status";',
+  );
 }
 
 export default { up, down };

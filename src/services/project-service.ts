@@ -7,14 +7,16 @@ import type {
   PaginatedResponse,
   UpdateProjectRequest,
 } from '#/types';
-import { ProjectNotFoundException, logger } from '#/utils';
+import { ProjectNotFoundException, logger, resolveStoragePath } from '#/utils';
 import { BaseService } from '#/services/base-service.js';
+import { rename, unlink } from 'fs/promises';
 
 interface ProjectRepository {
   create: typeof repositoryFunctions.createProjectRecord;
   findById: typeof repositoryFunctions.findProjectById;
   findDetailsById: typeof repositoryFunctions.findProjectDetailsById;
   findMany: typeof repositoryFunctions.findProjects;
+  findProjectFiles?: typeof repositoryFunctions.findProjectFiles;
   update: typeof repositoryFunctions.updateProjectRecord;
   delete: typeof repositoryFunctions.deleteProjectRecord;
 }
@@ -24,6 +26,7 @@ const defaultProjectRepository: ProjectRepository = {
   findById: (...args) => repositoryFunctions.findProjectById(...args),
   findDetailsById: (...args) => repositoryFunctions.findProjectDetailsById(...args),
   findMany: (...args) => repositoryFunctions.findProjects(...args),
+  findProjectFiles: (...args) => repositoryFunctions.findProjectFiles(...args),
   update: (...args) => repositoryFunctions.updateProjectRecord(...args),
   delete: (...args) => repositoryFunctions.deleteProjectRecord(...args),
 };
@@ -103,12 +106,55 @@ class ProjectService extends BaseService<ProjectRepository> {
       throw new ProjectNotFoundException();
     }
 
-    await this.repository.delete(project);
+    const files = this.repository.findProjectFiles
+      ? await this.repository.findProjectFiles(projectId)
+      : [];
+    const quarantinedFiles: Array<{ originalPath: string; quarantinePath: string }> = [];
+
+    for (const file of files) {
+      const originalPath = resolveStoragePath(file.storagePath);
+      const quarantinePath = `${originalPath}.deleting-project-${projectId}-${process.pid}-${Date.now()}`;
+      try {
+        await rename(originalPath, quarantinePath);
+        quarantinedFiles.push({ originalPath, quarantinePath });
+      } catch (error: unknown) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+          await this.restoreQuarantinedFiles(quarantinedFiles);
+          throw error;
+        }
+      }
+    }
+
+    try {
+      await this.repository.delete(project);
+    } catch (error: unknown) {
+      await this.restoreQuarantinedFiles(quarantinedFiles);
+      throw error;
+    }
+
+    await Promise.all(
+      quarantinedFiles.map(({ quarantinePath }) =>
+        unlink(quarantinePath).catch((error: NodeJS.ErrnoException) =>
+          error.code === 'ENOENT' ? undefined : Promise.reject(error),
+        ),
+      ),
+    );
+
     logger.info('Project deleted', {
       functionName: 'ProjectService.deleteProject',
       event: 'project.delete.completed',
       projectId,
     });
+  }
+
+  private async restoreQuarantinedFiles(
+    quarantinedFiles: Array<{ originalPath: string; quarantinePath: string }>,
+  ): Promise<void> {
+    await Promise.all(
+      quarantinedFiles.map(({ originalPath, quarantinePath }) =>
+        rename(quarantinePath, originalPath).catch(() => undefined),
+      ),
+    );
   }
 }
 

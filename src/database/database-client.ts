@@ -5,6 +5,12 @@ import { logger } from '#/utils';
 const databaseOptions = {
   dialect: 'postgres',
   logging: databaseConfig.logging,
+  pool: {
+    max: 10,
+    min: 2,
+    acquire: 30_000,
+    idle: 10_000,
+  },
   dialectOptions: {
     ssl: {
       require: true,
