@@ -1,6 +1,8 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FileNotFoundException, RequiredFileException } from '#/utils';
+import { mkdir, rm, writeFile } from 'fs/promises';
+import path from 'path';
 
 const fileService = {
   deleteProjectFile: vi.fn(),
@@ -9,7 +11,15 @@ const fileService = {
   uploadProjectFiles: vi.fn(),
 };
 
+const databaseClient = {
+  authenticate: vi.fn(),
+};
+
 vi.mock('#/services', () => fileService);
+vi.mock('#/database', () => ({
+  databaseClient,
+  initializeModelRelations: vi.fn(),
+}));
 
 const { app } = await import('#/app.js');
 
@@ -108,5 +118,70 @@ describe('File API', () => {
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ success: false, error: 'File not found' });
+  });
+
+  it('handles a missing file during download', async () => {
+    fileService.getProjectFile.mockResolvedValue({
+      id: 999,
+      projectId: 2,
+      name: 'missing.txt',
+      storagePath: 'uploads/2/files/missing.txt',
+    });
+
+    const response = await request(app).get('/api/v1/projects/2/files/999/download');
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({
+      success: false,
+      error: 'Unable to download file',
+    });
+  });
+
+  it('downloads a file successfully', async () => {
+    const projectDirectory = path.join(process.cwd(), 'uploads', 'test-download');
+    const sourcePath = path.join(projectDirectory, 'download.txt');
+    await mkdir(projectDirectory, { recursive: true });
+    await writeFile(sourcePath, 'download test content');
+
+    fileService.getProjectFile.mockResolvedValue({
+      id: 1,
+      projectId: 2,
+      name: 'download.txt',
+      storagePath: path.relative(process.cwd(), sourcePath),
+    });
+
+    try {
+      const response = await request(app).get('/api/v1/projects/2/files/1/download');
+
+      expect(response.status).toBe(200);
+      expect(response.headers['content-disposition']).toContain('download.txt');
+      expect(response.text).toBe('download test content');
+    } finally {
+      await rm(projectDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it('reports a healthy database', async () => {
+    databaseClient.authenticate.mockResolvedValue(undefined);
+
+    const response = await request(app).get('/api/v1/health');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      success: true,
+      data: { status: 'ok' },
+    });
+  });
+
+  it('reports an unavailable database', async () => {
+    databaseClient.authenticate.mockRejectedValue(new Error('Database unavailable'));
+
+    const response = await request(app).get('/api/v1/health');
+
+    expect(response.status).toBe(503);
+    expect(response.body).toEqual({
+      success: false,
+      error: 'Database unavailable',
+    });
   });
 });
