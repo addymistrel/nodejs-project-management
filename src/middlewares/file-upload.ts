@@ -1,5 +1,5 @@
 import { MAX_FILE_PER_UPLOAD, MAX_FILE_SIZE_ALLOWED } from '#/constants/file-constants.js';
-import { ensureProjectFilesDirectory, getCleanFileName } from '#/utils';
+import { ensureProjectFilesDirectory, getUniqueFileName } from '#/utils';
 import { Request } from 'express';
 import multer from 'multer';
 
@@ -18,7 +18,7 @@ const fileUpload = multer({
     },
 
     filename: (_req, file, next): void => {
-      next(null, getCleanFileName(file.originalname));
+      next(null, getUniqueFileName(file.originalname));
     },
   }),
 

@@ -30,6 +30,13 @@ function getCleanFileName(name: string): string {
   return fileName;
 }
 
+function getUniqueFileName(name: string): string {
+  const cleanName = getCleanFileName(name);
+  const extension = path.extname(cleanName);
+  const baseName = path.basename(cleanName, extension);
+  return `${baseName}-${randomUUID()}${extension}`;
+}
+
 async function ensureProjectFilesDirectory(projectId: number): Promise<string> {
   const dir = getProjectFilesDir(projectId);
 
@@ -69,4 +76,5 @@ export {
   getStoragePath,
   resolveStoragePath,
   getCleanFileName,
+  getUniqueFileName,
 };

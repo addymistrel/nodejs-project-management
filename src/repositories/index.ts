@@ -5,11 +5,13 @@ import {
   findProjectById,
   findProjectDetailsById,
   findProjects,
+  findProjectFiles,
 } from '#/repositories/project-repository.js';
 import {
   createFileRecords,
   deleteFileRecord,
   findFilesByProjectAndId,
+  findFilesByProjectAndIds,
   findFilesByProjectId,
 } from '#/repositories/file-repository.js';
 import type { CreateFileRecordInput } from '#/repositories/file-repository.js';
@@ -21,6 +23,7 @@ import {
   markJobProcessing,
   updateJobProgress,
   findJobsByProjectId,
+  saveCompletedZipJob,
 } from '#/repositories/job-repository.js';
 import { createUserRecord, findUserByEmail, findUserById } from '#/repositories/user-repository.js';
 
@@ -33,6 +36,7 @@ export {
   createFileRecords,
   deleteFileRecord,
   findFilesByProjectAndId,
+  findFilesByProjectAndIds,
   findFilesByProjectId,
   completeJob,
   createZipJobRecord,
@@ -41,7 +45,9 @@ export {
   markJobProcessing,
   updateJobProgress,
   findJobsByProjectId,
+  saveCompletedZipJob,
   findProjects,
+  findProjectFiles,
   createUserRecord,
   findUserByEmail,
   findUserById,

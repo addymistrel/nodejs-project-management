@@ -1,4 +1,4 @@
-import { FileModel, JobModel, ProjectModel } from '#/database';
+import { databaseClient, FileModel, JobModel, ProjectModel } from '#/database';
 import { CreateProjectRequest, UpdateProjectRequest } from '#/types';
 
 interface ProjectDetails {
@@ -66,7 +66,13 @@ async function updateProjectRecord(
 }
 
 async function deleteProjectRecord(project: ProjectModel): Promise<void> {
-  await project.destroy();
+  await databaseClient.transaction(async (transaction) => {
+    await project.destroy({ transaction });
+  });
+}
+
+async function findProjectFiles(projectId: number): Promise<FileModel[]> {
+  return FileModel.findAll({ where: { projectId } });
 }
 
 export {
@@ -76,4 +82,5 @@ export {
   findProjectById,
   findProjectDetailsById,
   findProjects,
+  findProjectFiles,
 };

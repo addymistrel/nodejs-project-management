@@ -1,6 +1,7 @@
 import { JOB_STATUSES, JOB_TYPES } from '#/constants';
-import { JobModel } from '#/database';
+import { databaseClient, FileModel, JobModel } from '#/database';
 import { Op } from 'sequelize';
+import type { Transaction } from 'sequelize';
 
 async function createZipJobRecord(projectId: number): Promise<JobModel> {
   return JobModel.create({
@@ -57,6 +58,63 @@ async function completeJob(jobId: number, outputFileId: number): Promise<void> {
   );
 }
 
+async function saveCompletedZipJob(
+  jobId: number,
+  projectId: number,
+  storagePath: string,
+  size: number,
+): Promise<FileModel> {
+  return databaseClient.transaction(async (transaction) => {
+    const outputFile = await createOutputFileRecord(
+      projectId,
+      jobId,
+      storagePath,
+      size,
+      transaction,
+    );
+    await markJobCompleted(jobId, outputFile.id, transaction);
+    return outputFile;
+  });
+}
+
+async function createOutputFileRecord(
+  projectId: number,
+  jobId: number,
+  storagePath: string,
+  size: number,
+  transaction: Transaction,
+): Promise<FileModel> {
+  return FileModel.create(
+    {
+      projectId,
+      name: `project-${projectId}-job-${jobId}.zip`,
+      storagePath,
+      size,
+      mimeType: 'application/zip',
+      checksum: null,
+      isOutput: true,
+    },
+    { transaction },
+  );
+}
+
+async function markJobCompleted(
+  jobId: number,
+  outputFileId: number,
+  transaction: Transaction,
+): Promise<void> {
+  await JobModel.update(
+    {
+      status: JOB_STATUSES.COMPLETED,
+      progress: 100,
+      outputFileId,
+      completedAt: new Date(),
+      errorMessage: null,
+    },
+    { where: { id: jobId, status: JOB_STATUSES.PROCESSING }, transaction },
+  );
+}
+
 async function failJob(jobId: number, errorMessage: string): Promise<void> {
   await JobModel.update(
     {
@@ -80,5 +138,6 @@ export {
   findJobByProjectAndId,
   findJobsByProjectId,
   markJobProcessing,
+  saveCompletedZipJob,
   updateJobProgress,
 };

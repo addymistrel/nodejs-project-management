@@ -18,8 +18,10 @@ interface JobRepository {
   createOutputFile: typeof repositoryFunctions.createFileRecords;
   createZipJob: typeof repositoryFunctions.createZipJobRecord;
   complete: typeof repositoryFunctions.completeJob;
+  saveCompletedZipJob: typeof repositoryFunctions.saveCompletedZipJob;
   fail: typeof repositoryFunctions.failJob;
   findFilesByProjectAndId: typeof repositoryFunctions.findFilesByProjectAndId;
+  findFilesByProjectAndIds: typeof repositoryFunctions.findFilesByProjectAndIds;
   findJobByProjectAndId: typeof repositoryFunctions.findJobByProjectAndId;
   findJobsByProjectId: typeof repositoryFunctions.findJobsByProjectId;
   findProjectById: typeof repositoryFunctions.findProjectById;
@@ -31,8 +33,10 @@ const defaultJobRepository: JobRepository = {
   createOutputFile: (...args) => repositoryFunctions.createFileRecords(...args),
   createZipJob: (...args) => repositoryFunctions.createZipJobRecord(...args),
   complete: (...args) => repositoryFunctions.completeJob(...args),
+  saveCompletedZipJob: (...args) => repositoryFunctions.saveCompletedZipJob(...args),
   fail: (...args) => repositoryFunctions.failJob(...args),
   findFilesByProjectAndId: (...args) => repositoryFunctions.findFilesByProjectAndId(...args),
+  findFilesByProjectAndIds: (...args) => repositoryFunctions.findFilesByProjectAndIds(...args),
   findJobByProjectAndId: (...args) => repositoryFunctions.findJobByProjectAndId(...args),
   findJobsByProjectId: (...args) => repositoryFunctions.findJobsByProjectId(...args),
   findProjectById: (...args) => repositoryFunctions.findProjectById(...args),
@@ -141,16 +145,13 @@ class JobService extends BaseService<JobRepository> {
     size: number,
   ): Promise<void> {
     try {
-      const [outputFile] = await this.repository.createOutputFile(projectId, [
-        {
-          name: `project-${projectId}-job-${jobId}.zip`,
-          storagePath: path.relative(process.cwd(), outputPath),
-          size,
-          mimeType: 'application/zip',
-          isOutput: true,
-        },
-      ]);
-      await this.repository.complete(jobId, outputFile.id);
+      const storagePath = path.relative(process.cwd(), outputPath);
+      const outputFile = await this.repository.saveCompletedZipJob(
+        jobId,
+        projectId,
+        storagePath,
+        size,
+      );
       this.logJobCompleted(projectId, jobId, outputFile.id);
     } catch (error: unknown) {
       this.logOutputFailure(projectId, jobId, error);
@@ -171,21 +172,38 @@ class JobService extends BaseService<JobRepository> {
     projectId: number,
     fileIds: number[],
   ): Promise<Array<{ path: string; name: string }>> {
-    const files = await Promise.all(
-      fileIds.map((fileId) => this.repository.findFilesByProjectAndId(projectId, fileId)),
-    );
+    const files = await this.loadSourceFiles(projectId, fileIds);
+    const filesById = new Map(files.map((file) => [file.id, file]));
+    const uniqueFileIds = [...new Set(fileIds)];
 
-    if (files.some((file) => !file)) {
+    if (
+      uniqueFileIds.some((fileId) => !filesById.has(fileId)) ||
+      files.length !== uniqueFileIds.length
+    ) {
       throw new FileDoesNotBelongToProjectException();
     }
 
-    return files.map((file) => {
+    return uniqueFileIds.map((fileId) => {
+      const file = filesById.get(fileId);
       if (!file) {
         throw new FileDoesNotBelongToProjectException();
       }
-
       return { path: resolveStoragePath(file.storagePath), name: file.name };
     });
+  }
+
+  private async loadSourceFiles(
+    projectId: number,
+    fileIds: number[],
+  ): Promise<Array<{ id: number; storagePath: string; name: string }>> {
+    if (this.repository.findFilesByProjectAndIds) {
+      return this.repository.findFilesByProjectAndIds(projectId, fileIds);
+    }
+
+    const results = await Promise.all(
+      fileIds.map((fileId) => this.repository.findFilesByProjectAndId(projectId, fileId)),
+    );
+    return results.filter((file) => file !== null);
   }
 
   private async handleWorkerMessageSafely(
