@@ -1,7 +1,7 @@
 import { MAX_FILE_PER_UPLOAD, MAX_FILE_SIZE_ALLOWED } from '#/constants/file-constants.js';
 import { ensureProjectFilesDirectory, getUniqueFileName } from '#/utils';
 import { findProjectById } from '#/repositories';
-import { NextFunction, Request, Response } from 'express';
+import { Request } from 'express';
 import multer from 'multer';
 import path from 'path';
 import { InvalidRequestException, ProjectNotFoundException } from '#/utils';
@@ -34,25 +34,16 @@ const allowedExtensions = new Set([
   '.webp',
 ]);
 
-function validateProjectExistsForUpload(req: Request, _res: Response, next: NextFunction): void {
-  const projectId = Number(req.params.projectId);
-
-  findProjectById(projectId)
-    .then((project) => {
-      if (!project) {
-        next(new ProjectNotFoundException());
-        return;
-      }
-      next();
-    })
-    .catch(next);
-}
-
 const fileUpload = multer({
   storage: multer.diskStorage({
     destination: async (req: Request, _file, next): Promise<void> => {
       try {
         const projectId = Number(req.params.projectId);
+        const project = await findProjectById(projectId);
+        if (!project) {
+          next(new ProjectNotFoundException(), '');
+          return;
+        }
         const dir = await ensureProjectFilesDirectory(projectId);
 
         next(null, dir);
@@ -81,4 +72,4 @@ const fileUpload = multer({
   },
 });
 
-export { fileUpload, validateProjectExistsForUpload };
+export { fileUpload };

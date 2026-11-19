@@ -3,14 +3,9 @@ import { databaseConfig } from '#/config';
 import { logger } from '#/utils';
 
 const databaseOptions = {
-  dialect: 'postgres',
+  dialect: databaseConfig.dialect,
   logging: databaseConfig.logging,
-  pool: {
-    max: 10,
-    min: 2,
-    acquire: 30_000,
-    idle: 10_000,
-  },
+  pool: databaseConfig.pool,
   dialectOptions: databaseConfig.ssl ? { ssl: databaseConfig.ssl } : undefined,
 } as const;
 
@@ -38,4 +33,8 @@ async function connectToDatabase(): Promise<void> {
   }
 }
 
-export { databaseClient, connectToDatabase };
+async function disconnectDatabase(): Promise<void> {
+  await databaseClient.close();
+}
+
+export { databaseClient, connectToDatabase, disconnectDatabase };
