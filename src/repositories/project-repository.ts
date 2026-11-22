@@ -1,10 +1,22 @@
-import { databaseClient, FileModel, JobModel, ProjectModel } from '#/database';
+import { databaseClient, FileModel, ProjectModel } from '#/database';
+import { FILE_SCHEMA_CONST, JOB_SCHEMA_CONST, PROJECT_SCHEMA_CONST } from '#/constants';
 import { CreateProjectRequest, UpdateProjectRequest } from '#/types';
+import { QueryTypes } from 'sequelize';
 
 interface ProjectDetails {
   project: ProjectModel;
   filesCount: number;
   jobsCount: number;
+}
+
+interface ProjectDetailsRow {
+  id: number;
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  filesCount: number | string;
+  jobsCount: number | string;
 }
 
 async function createProjectRecord(projectData: CreateProjectRequest): Promise<ProjectModel> {
@@ -31,30 +43,42 @@ async function findProjects(
 }
 
 async function findProjectDetailsById(projectId: number): Promise<ProjectDetails | null> {
-  const project = await findProjectById(projectId);
+  const [row] = await databaseClient.query<ProjectDetailsRow>(
+    `SELECT p.id, p.name, p.description, p.created_at AS "createdAt", p.updated_at AS "updatedAt",
+      (SELECT COUNT(*) FROM "${FILE_SCHEMA_CONST.TABLE_NAME}" f WHERE f.project_id = p.id) AS "filesCount",
+      (SELECT COUNT(*) FROM "${JOB_SCHEMA_CONST.TABLE_NAME}" j WHERE j.project_id = p.id) AS "jobsCount"
+     FROM "${PROJECT_SCHEMA_CONST.TABLE_NAME}" p
+     WHERE p.id = :projectId
+     LIMIT 1`,
+    {
+      replacements: { projectId },
+      type: QueryTypes.SELECT,
+    },
+  );
 
-  if (!project) {
+  if (!row) {
     return null;
   }
 
-  const [filesCount, jobsCount] = await Promise.all([
-    FileModel.count({
-      where: {
-        projectId,
-      },
-    }),
-    JobModel.count({
-      where: {
-        projectId,
-      },
-    }),
-  ]);
-
+  const project = toProjectModel(row);
   return {
     project,
-    filesCount,
-    jobsCount,
+    filesCount: Number(row.filesCount),
+    jobsCount: Number(row.jobsCount),
   };
+}
+
+function toProjectModel(row: ProjectDetailsRow): ProjectModel {
+  return ProjectModel.build(
+    {
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    },
+    { isNewRecord: false },
+  );
 }
 
 async function updateProjectRecord(

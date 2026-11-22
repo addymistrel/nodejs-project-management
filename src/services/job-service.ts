@@ -13,6 +13,7 @@ import {
 import { Worker } from 'worker_threads';
 import path from 'path';
 import { BaseService } from '#/services/base-service.js';
+import { jobConfig } from '#/config';
 
 interface JobRepository {
   createOutputFile: typeof repositoryFunctions.createFileRecords;
@@ -45,6 +46,13 @@ const defaultJobRepository: JobRepository = {
 };
 
 class JobService extends BaseService<JobRepository> {
+  private activeWorkers = 0;
+  private workerQueue: Array<{
+    jobId: number;
+    projectId: number;
+    files: Array<{ path: string; name: string }>;
+  }> = [];
+
   constructor(repository: JobRepository) {
     super(repository);
   }
@@ -100,15 +108,61 @@ class JobService extends BaseService<JobRepository> {
     files: Array<{ path: string; name: string }>,
   ): Promise<void> {
     await ensureProjectJobsDirectory(projectId);
+
+    if (this.activeWorkers >= jobConfig.workerPoolSize) {
+      this.workerQueue.push({ jobId, projectId, files });
+      return;
+    }
+
+    this.startZipWorker(jobId, projectId, files);
+  }
+
+  private startZipWorker(
+    jobId: number,
+    projectId: number,
+    files: Array<{ path: string; name: string }>,
+  ): void {
+    this.activeWorkers += 1;
     const outputPath = this.getOutputPath(projectId, jobId);
     const worker = new Worker(new URL('../workers/zip-worker.js', import.meta.url), {
       workerData: { outputPath, files },
     });
+    this.registerWorkerHandlers(worker, jobId, projectId, outputPath);
+  }
 
-    worker.on('message', (message: WorkerMessage) =>
-      this.handleWorkerMessageSafely(message, jobId, projectId, outputPath),
-    );
-    worker.on('error', (error: Error) => this.handleWorkerError(error, projectId, jobId));
+  private registerWorkerHandlers(
+    worker: Worker,
+    jobId: number,
+    projectId: number,
+    outputPath: string,
+  ): void {
+    let terminalMessageReceived = false;
+
+    worker.on('message', (message: WorkerMessage) => {
+      if (message.type === 'completed' || message.type === 'failed') {
+        terminalMessageReceived = true;
+      }
+      void this.handleWorkerMessageSafely(message, jobId, projectId, outputPath);
+    });
+    worker.on('error', (error: Error) => {
+      terminalMessageReceived = true;
+      this.handleWorkerError(error, projectId, jobId);
+    });
+    worker.on('exit', (code) => {
+      if (!terminalMessageReceived) {
+        const error = new Error(`ZIP worker exited unexpectedly with code ${code ?? 'unknown'}`);
+        this.handleWorkerError(error, projectId, jobId);
+      }
+      this.activeWorkers -= 1;
+      this.startQueuedWorker();
+    });
+  }
+
+  private startQueuedWorker(): void {
+    const next = this.workerQueue.shift();
+    if (next) {
+      this.startZipWorker(next.jobId, next.projectId, next.files);
+    }
   }
 
   private async handleWorkerMessage(

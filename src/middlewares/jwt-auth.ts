@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { HTTP_STATUS_CODE } from '#/constants';
 import { AppResponse } from '#/utils';
+import { environmentConfig } from '#/config';
 
 function isAccessToken(token: string, secret: string): boolean {
   try {
@@ -15,12 +16,12 @@ function isAccessToken(token: string, secret: string): boolean {
 }
 
 function jwtAuth(request: Request, response: Response, next: NextFunction): void {
-  if (process.env.NODE_ENV === 'test') {
+  if (environmentConfig.nodeEnvironment === 'test') {
     next();
     return;
   }
 
-  const secret = process.env.JWT_SECRET?.trim();
+  const secret = environmentConfig.jwtSecret;
   if (!secret) {
     AppResponse.sendError(
       response,

@@ -58,7 +58,11 @@ async function downloadFileController(req: Request, res: Response): Promise<void
   const file = await getProjectFile(projectId, fileId);
   const absPath = resolveStoragePath(file.storagePath);
 
-  res.download(absPath, file.name);
+  res.download(absPath, file.name, (error) => {
+    if (error && !res.headersSent) {
+      AppResponse.sendError(res, HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, 'Unable to download file');
+    }
+  });
 }
 
 export { uploadFilesController, listFilesController, deleteFileController, downloadFileController };

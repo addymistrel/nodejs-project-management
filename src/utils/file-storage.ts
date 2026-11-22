@@ -7,8 +7,9 @@ import {
 import { randomUUID } from 'crypto';
 import { mkdir } from 'fs/promises';
 import path from 'path';
+import { environmentConfig } from '#/config';
 
-const uploadsFolderRoot = path.resolve(process.env.UPLOADS_DIR ?? UPLOAD_DEFAULT_DIR);
+const uploadsFolderRoot = path.resolve(environmentConfig.uploadsDir || UPLOAD_DEFAULT_DIR);
 
 function getProjectFilesDir(projectId: number): string {
   return path.join(uploadsFolderRoot, String(projectId), FILE_FOLDER_NAME);

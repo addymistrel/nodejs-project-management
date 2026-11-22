@@ -23,6 +23,7 @@ import {
   getUniqueFileName,
 } from '#/utils/file-storage.js';
 import { getPaginationQuery } from '#/utils/pagination.js';
+import { parsePositiveInteger } from '#/utils/helper-functions.js';
 
 export {
   AppExceptionBase,
@@ -46,4 +47,5 @@ export {
   EmailAlreadyExistsException,
   InvalidCredentialsException,
   getPaginationQuery,
+  parsePositiveInteger,
 };

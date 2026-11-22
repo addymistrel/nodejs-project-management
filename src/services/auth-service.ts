@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { UserModel } from '#/database';
 import * as repositoryFunctions from '#/repositories';
 import { EmailAlreadyExistsException, InvalidCredentialsException } from '#/utils';
+import { environmentConfig } from '#/config';
 
 interface AuthRepository {
   createUser: typeof repositoryFunctions.createUserRecord;
@@ -97,7 +98,7 @@ class AuthService {
   }
 
   private createTokens(user: UserModel): Pick<AuthResponse, 'token' | 'refreshToken'> {
-    const secret = process.env.JWT_SECRET?.trim();
+    const secret = environmentConfig.jwtSecret;
     if (!secret) {
       throw new Error('JWT_SECRET is not configured');
     }
@@ -117,7 +118,7 @@ class AuthService {
   }
 
   private getRefreshSecret(): string {
-    const secret = process.env.JWT_REFRESH_SECRET?.trim() ?? process.env.JWT_SECRET?.trim();
+    const secret = environmentConfig.jwtRefreshSecret;
     if (!secret) {
       throw new Error('JWT_REFRESH_SECRET or JWT_SECRET is not configured');
     }

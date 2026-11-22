@@ -1,4 +1,36 @@
+import { environmentConfig } from '#/config';
+
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
+
+const LOG_LEVELS: Record<LogLevel, number> = {
+  debug: 10,
+  info: 20,
+  warn: 30,
+  error: 40,
+};
+
+function getConfiguredLogLevel(): LogLevel {
+  if (environmentConfig.logLevel && environmentConfig.logLevel in LOG_LEVELS) {
+    return environmentConfig.logLevel as LogLevel;
+  }
+  return environmentConfig.nodeEnvironment === 'production' ? 'info' : 'debug';
+}
+
+function safeStringify(value: unknown): string {
+  const seen = new WeakSet<object>();
+  return JSON.stringify(value, (_key, current: unknown) => {
+    if (typeof current === 'bigint') {
+      return current.toString();
+    }
+    if (typeof current === 'object' && current !== null) {
+      if (seen.has(current)) {
+        return '[Circular]';
+      }
+      seen.add(current);
+    }
+    return current;
+  });
+}
 
 interface LogContext {
   functionName?: string;
@@ -49,6 +81,10 @@ class Logger {
     context?: LogContext,
     error?: unknown,
   ): void {
+    if (LOG_LEVELS[level] < LOG_LEVELS[getConfiguredLogLevel()]) {
+      return;
+    }
+
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
@@ -57,7 +93,7 @@ class Logger {
       ...(error ? { error: this.serializeError(error) } : {}),
     };
 
-    const output = JSON.stringify(entry);
+    const output = safeStringify(entry);
 
     if (level === 'error') {
       process.stderr.write(`${output}\n`);
@@ -68,7 +104,7 @@ class Logger {
   }
 
   private getMessage(message: string | Record<string, unknown>): string {
-    return typeof message === 'string' ? message : JSON.stringify(message);
+    return typeof message === 'string' ? message : safeStringify(message);
   }
 
   private serializeError(error: unknown): LogEntry['error'] {

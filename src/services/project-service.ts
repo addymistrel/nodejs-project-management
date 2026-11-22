@@ -106,6 +106,27 @@ class ProjectService extends BaseService<ProjectRepository> {
       throw new ProjectNotFoundException();
     }
 
+    const quarantinedFiles = await this.quarantineProjectFiles(projectId);
+
+    try {
+      await this.repository.delete(project);
+    } catch (error: unknown) {
+      await this.restoreQuarantinedFiles(quarantinedFiles);
+      throw error;
+    }
+
+    await this.removeQuarantinedFiles(quarantinedFiles);
+
+    logger.info('Project deleted', {
+      functionName: 'ProjectService.deleteProject',
+      event: 'project.delete.completed',
+      projectId,
+    });
+  }
+
+  private async quarantineProjectFiles(
+    projectId: number,
+  ): Promise<Array<{ originalPath: string; quarantinePath: string }>> {
     const files = this.repository.findProjectFiles
       ? await this.repository.findProjectFiles(projectId)
       : [];
@@ -125,13 +146,12 @@ class ProjectService extends BaseService<ProjectRepository> {
       }
     }
 
-    try {
-      await this.repository.delete(project);
-    } catch (error: unknown) {
-      await this.restoreQuarantinedFiles(quarantinedFiles);
-      throw error;
-    }
+    return quarantinedFiles;
+  }
 
+  private async removeQuarantinedFiles(
+    quarantinedFiles: Array<{ originalPath: string; quarantinePath: string }>,
+  ): Promise<void> {
     await Promise.all(
       quarantinedFiles.map(({ quarantinePath }) =>
         unlink(quarantinePath).catch((error: NodeJS.ErrnoException) =>
@@ -139,12 +159,6 @@ class ProjectService extends BaseService<ProjectRepository> {
         ),
       ),
     );
-
-    logger.info('Project deleted', {
-      functionName: 'ProjectService.deleteProject',
-      event: 'project.delete.completed',
-      projectId,
-    });
   }
 
   private async restoreQuarantinedFiles(
