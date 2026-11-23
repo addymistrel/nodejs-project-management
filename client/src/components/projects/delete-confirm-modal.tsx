@@ -45,9 +45,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           </div>
         )}
 
-        <p className="text-sm text-zinc-600">
-          {PROJECT_MESSAGES.DELETE_CONFIRM_DESC}
-        </p>
+        <p className="text-sm text-zinc-600">{PROJECT_MESSAGES.DELETE_CONFIRM_DESC}</p>
 
         {project && (
           <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-lg">
@@ -57,20 +55,10 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         )}
 
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-100">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onClose}
-            disabled={isDeleting}
-          >
+          <Button type="button" variant="secondary" onClick={onClose} disabled={isDeleting}>
             {PROJECT_MESSAGES.CANCEL_BUTTON}
           </Button>
-          <Button
-            type="button"
-            variant="danger"
-            onClick={handleConfirm}
-            isLoading={isDeleting}
-          >
+          <Button type="button" variant="danger" onClick={handleConfirm} isLoading={isDeleting}>
             {PROJECT_MESSAGES.DELETE_CONFIRM_ACTION}
           </Button>
         </div>

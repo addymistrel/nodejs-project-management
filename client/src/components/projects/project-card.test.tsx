@@ -16,11 +16,7 @@ describe('ProjectCard (TDD)', () => {
   it('should render project name, description, and formatted date', () => {
     render(
       <BrowserRouter>
-        <ProjectCard
-          project={mockProject}
-          onEdit={vi.fn()}
-          onDelete={vi.fn()}
-        />
+        <ProjectCard project={mockProject} onEdit={vi.fn()} onDelete={vi.fn()} />
       </BrowserRouter>,
     );
 
@@ -36,11 +32,7 @@ describe('ProjectCard (TDD)', () => {
 
     render(
       <BrowserRouter>
-        <ProjectCard
-          project={emptyDescProject}
-          onEdit={vi.fn()}
-          onDelete={vi.fn()}
-        />
+        <ProjectCard project={emptyDescProject} onEdit={vi.fn()} onDelete={vi.fn()} />
       </BrowserRouter>,
     );
 
@@ -51,11 +43,7 @@ describe('ProjectCard (TDD)', () => {
     const onEdit = vi.fn();
     render(
       <BrowserRouter>
-        <ProjectCard
-          project={mockProject}
-          onEdit={onEdit}
-          onDelete={vi.fn()}
-        />
+        <ProjectCard project={mockProject} onEdit={onEdit} onDelete={vi.fn()} />
       </BrowserRouter>,
     );
 
@@ -67,11 +55,7 @@ describe('ProjectCard (TDD)', () => {
     const onDelete = vi.fn();
     render(
       <BrowserRouter>
-        <ProjectCard
-          project={mockProject}
-          onEdit={vi.fn()}
-          onDelete={onDelete}
-        />
+        <ProjectCard project={mockProject} onEdit={vi.fn()} onDelete={onDelete} />
       </BrowserRouter>,
     );
 

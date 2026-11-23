@@ -96,12 +96,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-100">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
+          <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
             {PROJECT_MESSAGES.CANCEL_BUTTON}
           </Button>
           <Button type="submit" isLoading={isSubmitting}>

@@ -5,12 +5,7 @@ import { Pagination } from './pagination';
 describe('Pagination Component (TDD)', () => {
   it('should render pagination info correctly', () => {
     const { container } = render(
-      <Pagination
-        currentPage={1}
-        totalItems={25}
-        itemsPerPage={10}
-        onPageChange={vi.fn()}
-      />,
+      <Pagination currentPage={1} totalItems={25} itemsPerPage={10} onPageChange={vi.fn()} />,
     );
 
     expect(container.textContent).toContain('Showing 1 to 10 of 25 results');
@@ -20,12 +15,7 @@ describe('Pagination Component (TDD)', () => {
   it('should disable previous button on first page and enable next button', () => {
     const onPageChange = vi.fn();
     render(
-      <Pagination
-        currentPage={1}
-        totalItems={25}
-        itemsPerPage={10}
-        onPageChange={onPageChange}
-      />,
+      <Pagination currentPage={1} totalItems={25} itemsPerPage={10} onPageChange={onPageChange} />,
     );
 
     const prevButton = screen.getByRole('button', { name: /previous/i });
@@ -41,12 +31,7 @@ describe('Pagination Component (TDD)', () => {
   it('should disable next button on last page', () => {
     const onPageChange = vi.fn();
     render(
-      <Pagination
-        currentPage={3}
-        totalItems={25}
-        itemsPerPage={10}
-        onPageChange={onPageChange}
-      />,
+      <Pagination currentPage={3} totalItems={25} itemsPerPage={10} onPageChange={onPageChange} />,
     );
 
     const prevButton = screen.getByRole('button', { name: /previous/i });
@@ -61,12 +46,7 @@ describe('Pagination Component (TDD)', () => {
 
   it('should not render anything when totalItems is 0', () => {
     const { container } = render(
-      <Pagination
-        currentPage={1}
-        totalItems={0}
-        itemsPerPage={10}
-        onPageChange={vi.fn()}
-      />,
+      <Pagination currentPage={1} totalItems={0} itemsPerPage={10} onPageChange={vi.fn()} />,
     );
 
     expect(container.firstChild).toBeNull();

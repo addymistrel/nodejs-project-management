@@ -6,19 +6,14 @@ import type { Project } from '@/types';
 
 describe('ProjectFormModal (TDD)', () => {
   it('should render create project form with empty inputs', () => {
-    render(
-      <ProjectFormModal
-        isOpen={true}
-        onClose={vi.fn()}
-        onSubmit={vi.fn()}
-        project={null}
-      />,
-    );
+    render(<ProjectFormModal isOpen={true} onClose={vi.fn()} onSubmit={vi.fn()} project={null} />);
 
     expect(screen.getByText(PROJECT_MESSAGES.CREATE_TITLE)).toBeInTheDocument();
     expect(screen.getByLabelText(PROJECT_MESSAGES.NAME_LABEL)).toHaveValue('');
     expect(screen.getByLabelText(PROJECT_MESSAGES.DESCRIPTION_LABEL)).toHaveValue('');
-    expect(screen.getByRole('button', { name: PROJECT_MESSAGES.SUBMIT_CREATE })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: PROJECT_MESSAGES.SUBMIT_CREATE }),
+    ).toBeInTheDocument();
   });
 
   it('should populate inputs when editing existing project', () => {
@@ -41,21 +36,18 @@ describe('ProjectFormModal (TDD)', () => {
 
     expect(screen.getByText(PROJECT_MESSAGES.EDIT_TITLE)).toBeInTheDocument();
     expect(screen.getByLabelText(PROJECT_MESSAGES.NAME_LABEL)).toHaveValue('Existing Project');
-    expect(screen.getByLabelText(PROJECT_MESSAGES.DESCRIPTION_LABEL)).toHaveValue('Existing Description');
-    expect(screen.getByRole('button', { name: PROJECT_MESSAGES.SUBMIT_UPDATE })).toBeInTheDocument();
+    expect(screen.getByLabelText(PROJECT_MESSAGES.DESCRIPTION_LABEL)).toHaveValue(
+      'Existing Description',
+    );
+    expect(
+      screen.getByRole('button', { name: PROJECT_MESSAGES.SUBMIT_UPDATE }),
+    ).toBeInTheDocument();
   });
 
   it('should call onSubmit with entered data', async () => {
     const onSubmit = vi.fn().mockResolvedValueOnce(undefined);
 
-    render(
-      <ProjectFormModal
-        isOpen={true}
-        onClose={vi.fn()}
-        onSubmit={onSubmit}
-        project={null}
-      />,
-    );
+    render(<ProjectFormModal isOpen={true} onClose={vi.fn()} onSubmit={onSubmit} project={null} />);
 
     fireEvent.change(screen.getByLabelText(PROJECT_MESSAGES.NAME_LABEL), {
       target: { value: 'New Test Project' },

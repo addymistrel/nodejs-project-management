@@ -89,17 +89,17 @@ export const DashboardPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
               {PROJECT_MESSAGES.LIST_TITLE}
             </h1>
-            <p className="text-sm text-zinc-500 mt-1">
-              {PROJECT_MESSAGES.LIST_SUBTITLE}
-            </p>
+            <p className="text-sm text-zinc-500 mt-1">{PROJECT_MESSAGES.LIST_SUBTITLE}</p>
           </div>
 
-          <Button
-            onClick={handleOpenCreateModal}
-            className="self-start sm:self-auto gap-2"
-          >
+          <Button onClick={handleOpenCreateModal} className="self-start sm:self-auto gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             {PROJECT_MESSAGES.CREATE_BUTTON}
           </Button>
@@ -127,8 +127,19 @@ export const DashboardPage: React.FC = () => {
         {/* Content */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
-            <svg className="animate-spin h-8 w-8 text-indigo-600 mb-3" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <svg
+              className="animate-spin h-8 w-8 text-indigo-600 mb-3"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
             <p className="text-sm font-medium">{PROJECT_MESSAGES.LOADING_PROJECTS}</p>
@@ -137,16 +148,21 @@ export const DashboardPage: React.FC = () => {
           <div className="bg-white border border-zinc-200/80 rounded-xl p-12 text-center shadow-xs">
             <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
               </svg>
             </div>
-            <h3 className="text-base font-semibold text-zinc-900">{PROJECT_MESSAGES.EMPTY_TITLE}</h3>
+            <h3 className="text-base font-semibold text-zinc-900">
+              {PROJECT_MESSAGES.EMPTY_TITLE}
+            </h3>
             <p className="text-sm text-zinc-500 max-w-sm mx-auto mt-1 mb-6">
               {PROJECT_MESSAGES.EMPTY_SUBTITLE}
             </p>
-            <Button onClick={handleOpenCreateModal}>
-              {PROJECT_MESSAGES.CREATE_BUTTON}
-            </Button>
+            <Button onClick={handleOpenCreateModal}>{PROJECT_MESSAGES.CREATE_BUTTON}</Button>
           </div>
         ) : (
           <div className="flex flex-col gap-6">
