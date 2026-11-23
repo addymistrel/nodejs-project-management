@@ -1,43 +1,39 @@
-import React, { createContext, useState, useEffect, type ReactNode } from 'react';
-import type { AuthContextType, AuthState, LoginCredentials, SignupCredentials } from '@/types';
+import React, { useState, type ReactNode } from 'react';
+import type { AuthState, LoginCredentials, SignupCredentials } from '@/types';
 import { clearAuthData, getAccessToken, getRefreshToken, getUser, setAuthData } from '@/utils';
 import { authService } from '@/services';
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext } from './auth-context-value';
 
 export interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [state, setState] = useState<AuthState>({
+const getInitialAuthState = (): AuthState => {
+  const token = getAccessToken();
+  const refreshToken = getRefreshToken();
+  const user = getUser();
+
+  if (token && refreshToken && user) {
+    return {
+      user,
+      token,
+      refreshToken,
+      isAuthenticated: true,
+      isLoading: false,
+    };
+  }
+
+  return {
     user: null,
     token: null,
     refreshToken: null,
     isAuthenticated: false,
-    isLoading: true,
-  });
+    isLoading: false,
+  };
+};
 
-  useEffect(() => {
-    const token = getAccessToken();
-    const refreshToken = getRefreshToken();
-    const user = getUser();
-
-    if (token && refreshToken && user) {
-      setState({
-        user,
-        token,
-        refreshToken,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } else {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-      }));
-    }
-  }, []);
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [state, setState] = useState<AuthState>(getInitialAuthState);
 
   const login = async (credentials: LoginCredentials): Promise<void> => {
     const data = await authService.login(credentials);

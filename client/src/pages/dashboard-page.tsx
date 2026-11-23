@@ -41,7 +41,11 @@ export const DashboardPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchProjects(page);
+    const timeoutId = window.setTimeout(() => {
+      void fetchProjects(page);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [fetchProjects, page]);
 
   const handleOpenCreateModal = () => {

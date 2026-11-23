@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type FormEvent } from 'react';
+import React, { useState, type FormEvent } from 'react';
 import type { CreateProjectInput, Project } from '@/types';
 import { PROJECT_MESSAGES } from '@/constants';
 import { Button, Input, Modal } from '@/components/common';
@@ -16,22 +16,25 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   onSubmit,
   project,
 }) => {
+  const formKey = `${isOpen ? 'open' : 'closed'}-${project?.id ?? 'create'}`;
+
+  return (
+    <ProjectForm
+      key={formKey}
+      isOpen={isOpen}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      project={project}
+    />
+  );
+};
+
+const ProjectForm: React.FC<ProjectFormModalProps> = ({ isOpen, onClose, onSubmit, project }) => {
   const isEditing = Boolean(project);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState(project?.name ?? '');
+  const [description, setDescription] = useState(project?.description ?? '');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (project) {
-      setName(project.name);
-      setDescription(project.description ?? '');
-    } else {
-      setName('');
-      setDescription('');
-    }
-    setError(null);
-  }, [project, isOpen]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

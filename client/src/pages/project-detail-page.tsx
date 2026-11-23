@@ -1,25 +1,47 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { projectService } from '@/services';
-import type { CreateProjectInput, ProjectDetails } from '@/types';
-import { APP_ROUTES, PROJECT_MESSAGES } from '@/constants';
-import { Header, Button, Card } from '@/components/common';
+import { projectService, fileService, jobService } from '@/services';
+import type { CreateProjectInput, ProjectDetails, ProjectFile, ZipJob } from '@/types';
+import {
+  APP_ROUTES,
+  FILE_MESSAGES,
+  JOB_CONSTANTS,
+  JOB_MESSAGES,
+  JOB_STATUS,
+  PROJECT_MESSAGES,
+} from '@/constants';
+import { Header, Button, Card, Modal } from '@/components/common';
 import { ProjectFormModal, DeleteConfirmModal } from '@/components/projects';
+import { FileUploadCard, FileTable } from '@/components/files';
+import { JobList } from '@/components/jobs';
 
 export const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
+  // Project state
   const [project, setProject] = useState<ProjectDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
+
+  // Files & Jobs state
+  const [files, setFiles] = useState<ProjectFile[]>([]);
+  const [jobs, setJobs] = useState<ZipJob[]>([]);
+  const [selectedFileIds, setSelectedFileIds] = useState<number[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isCreatingZip, setIsCreatingZip] = useState(false);
+
+  // Modals state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<ProjectFile | null>(null);
+
+  // Polling ref
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchProjectDetails = useCallback(async () => {
     if (!projectId) return;
-    setIsLoading(true);
-    setError(null);
     try {
       const data = await projectService.getProject(projectId);
       setProject(data);
@@ -29,25 +51,155 @@ export const ProjectDetailPage: React.FC = () => {
       } else {
         setError('Failed to load project details');
       }
-    } finally {
-      setIsLoading(false);
     }
   }, [projectId]);
 
-  useEffect(() => {
-    fetchProjectDetails();
-  }, [fetchProjectDetails]);
+  const fetchFiles = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      const data = await fileService.listFiles(projectId, { limit: 50 });
+      setFiles(data.items);
+    } catch (err: unknown) {
+      console.error('Failed to load files:', err);
+    }
+  }, [projectId]);
 
-  const handleUpdate = async (data: CreateProjectInput) => {
+  const fetchJobs = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      const data = await jobService.listJobs(projectId, { limit: 20 });
+      setJobs(data.items);
+    } catch (err: unknown) {
+      console.error('Failed to load jobs:', err);
+    }
+  }, [projectId]);
+
+  // Initial load
+  useEffect(() => {
+    let mounted = true;
+    const loadAll = async () => {
+      setIsLoading(true);
+      setError(null);
+      await Promise.all([fetchProjectDetails(), fetchFiles(), fetchJobs()]);
+      if (mounted) setIsLoading(false);
+    };
+
+    loadAll();
+
+    return () => {
+      mounted = false;
+    };
+  }, [fetchProjectDetails, fetchFiles, fetchJobs]);
+
+  // Job Polling logic for in-progress jobs
+  useEffect(() => {
+    const hasActiveJobs = jobs.some(
+      (j) => j.status === JOB_STATUS.PENDING || j.status === JOB_STATUS.PROCESSING,
+    );
+
+    if (hasActiveJobs) {
+      pollTimerRef.current = setTimeout(() => {
+        fetchJobs();
+        fetchFiles(); // In case a job completed and generated an output file
+      }, JOB_CONSTANTS.POLL_INTERVAL_MS);
+    }
+
+    return () => {
+      if (pollTimerRef.current) {
+        clearTimeout(pollTimerRef.current);
+      }
+    };
+  }, [jobs, fetchJobs, fetchFiles]);
+
+  const handleUpdateProject = async (data: CreateProjectInput) => {
     if (!projectId) return;
     await projectService.updateProject(projectId, data);
     await fetchProjectDetails();
+    setNotification(PROJECT_MESSAGES.SUCCESS_UPDATED);
+    setTimeout(() => setNotification(null), 4000);
   };
 
-  const handleDelete = async () => {
+  const handleDeleteProject = async () => {
     if (!projectId) return;
     await projectService.deleteProject(projectId);
     navigate(APP_ROUTES.DASHBOARD);
+  };
+
+  const handleUploadFiles = async (uploadedFiles: File[]) => {
+    if (!projectId) return;
+    setIsUploading(true);
+    try {
+      await fileService.uploadFiles(projectId, uploadedFiles);
+      await Promise.all([fetchFiles(), fetchProjectDetails()]);
+      setNotification(FILE_MESSAGES.SUCCESS_UPLOADED);
+      setTimeout(() => setNotification(null), 4000);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDownloadFile = async (file: ProjectFile) => {
+    if (!projectId) return;
+    try {
+      const blob = await fileService.downloadFile(projectId, file.fileId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Download failed');
+    }
+  };
+
+  const handleDeleteFileConfirm = async () => {
+    if (!projectId || !fileToDelete) return;
+    try {
+      await fileService.deleteFile(projectId, fileToDelete.fileId);
+      setSelectedFileIds((prev) => prev.filter((id) => id !== fileToDelete.fileId));
+      setFileToDelete(null);
+      await Promise.all([fetchFiles(), fetchProjectDetails()]);
+      setNotification(FILE_MESSAGES.SUCCESS_DELETED);
+      setTimeout(() => setNotification(null), 4000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Delete file failed');
+    }
+  };
+
+  const handleCreateZip = async () => {
+    if (!projectId || selectedFileIds.length === 0) return;
+    setIsCreatingZip(true);
+    try {
+      await jobService.createZipJob(projectId, { fileIds: selectedFileIds });
+      setSelectedFileIds([]);
+      await Promise.all([fetchJobs(), fetchProjectDetails()]);
+      setNotification(JOB_MESSAGES.SUCCESS_CREATED);
+      setTimeout(() => setNotification(null), 4000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Zip job creation failed');
+    } finally {
+      setIsCreatingZip(false);
+    }
+  };
+
+  const handleDownloadZipJob = async (outputFileId: number) => {
+    if (!projectId) return;
+    try {
+      const blob = await fileService.downloadFile(projectId, outputFileId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `project-${projectId}-archive.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Download ZIP failed');
+    }
   };
 
   return (
@@ -73,7 +225,26 @@ export const ProjectDetailPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* State rendering */}
+        {/* Notifications */}
+        {notification && (
+          <div className="mb-6 p-4 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between">
+            <span>{notification}</span>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-emerald-600 hover:text-emerald-800 p-1 cursor-pointer"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        {/* Loading / Error States */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
             <svg
@@ -93,20 +264,18 @@ export const ProjectDetailPage: React.FC = () => {
             </svg>
             <p className="text-sm font-medium">{PROJECT_MESSAGES.LOADING_PROJECT}</p>
           </div>
-        ) : error || !project ? (
+        ) : !project ? (
           <Card className="text-center py-12">
             <h3 className="text-lg font-semibold text-zinc-900">
               {PROJECT_MESSAGES.NOT_FOUND_TITLE}
             </h3>
-            <p className="text-sm text-zinc-500 mt-1 mb-6">
-              {error || PROJECT_MESSAGES.NOT_FOUND_SUBTITLE}
-            </p>
+            <p className="text-sm text-zinc-500 mt-1 mb-6">{PROJECT_MESSAGES.NOT_FOUND_SUBTITLE}</p>
             <Button onClick={() => navigate(APP_ROUTES.DASHBOARD)}>
               {PROJECT_MESSAGES.BACK_TO_PROJECTS}
             </Button>
           </Card>
         ) : (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-8">
             {/* Project Header Card */}
             <Card className="flex flex-col md:flex-row md:items-start justify-between gap-6">
               <div className="flex-1">
@@ -179,7 +348,7 @@ export const ProjectDetailPage: React.FC = () => {
                   <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider block">
                     {PROJECT_MESSAGES.FILES_COUNT_LABEL}
                   </span>
-                  <span className="text-2xl font-bold text-zinc-900">{project.filesCount}</span>
+                  <span className="text-2xl font-bold text-zinc-900">{files.length}</span>
                 </div>
               </Card>
 
@@ -198,54 +367,111 @@ export const ProjectDetailPage: React.FC = () => {
                   <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider block">
                     {PROJECT_MESSAGES.JOBS_COUNT_LABEL}
                   </span>
-                  <span className="text-2xl font-bold text-zinc-900">{project.jobsCount}</span>
+                  <span className="text-2xl font-bold text-zinc-900">{jobs.length}</span>
                 </div>
               </Card>
             </div>
 
-            {/* Placeholder for Step 3 (Files & Jobs) */}
-            <Card className="border-dashed border-2 border-zinc-200 bg-zinc-50/50">
-              <div className="py-8 text-center">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-zinc-200/60 flex items-center justify-center text-zinc-500">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                    />
-                  </svg>
+            {/* Section 1: File Management */}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold text-zinc-900">{FILE_MESSAGES.SECTION_TITLE}</h2>
+                  <p className="text-xs text-zinc-500">{FILE_MESSAGES.SECTION_SUBTITLE}</p>
                 </div>
-                <h4 className="text-sm font-semibold text-zinc-800">Files & Zip Jobs Workspace</h4>
-                <p className="text-xs text-zinc-500 max-w-md mx-auto mt-1">
-                  Upload files, download individual documents, and trigger background zip archive
-                  jobs here (wired in Step 3 on branch feat/client-files-and-jobs).
-                </p>
+
+                {selectedFileIds.length > 0 && (
+                  <Button
+                    variant="primary"
+                    onClick={handleCreateZip}
+                    isLoading={isCreatingZip}
+                    className="gap-2 bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                      />
+                    </svg>
+                    {isCreatingZip
+                      ? JOB_MESSAGES.CREATING_BUTTON
+                      : `${JOB_MESSAGES.CREATE_ZIP_BUTTON} (${selectedFileIds.length})`}
+                  </Button>
+                )}
               </div>
-            </Card>
+
+              {/* Upload Card */}
+              <FileUploadCard onUpload={handleUploadFiles} isUploading={isUploading} />
+
+              {/* File Table */}
+              <FileTable
+                files={files}
+                selectedFileIds={selectedFileIds}
+                onSelectionChange={setSelectedFileIds}
+                onDownload={handleDownloadFile}
+                onDelete={(f) => setFileToDelete(f)}
+              />
+            </div>
+
+            {/* Section 2: Background Zip Jobs */}
+            <div className="flex flex-col gap-4 pt-4 border-t border-zinc-200">
+              <div>
+                <h2 className="text-lg font-bold text-zinc-900">{JOB_MESSAGES.SECTION_TITLE}</h2>
+                <p className="text-xs text-zinc-500">{JOB_MESSAGES.SECTION_SUBTITLE}</p>
+              </div>
+
+              <JobList jobs={jobs} onDownloadZip={handleDownloadZipJob} />
+            </div>
           </div>
         )}
       </main>
 
-      {/* Edit Modal */}
+      {/* Edit Project Modal */}
       {project && (
         <ProjectFormModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          onSubmit={handleUpdate}
+          onSubmit={handleUpdateProject}
           project={project}
         />
       )}
 
-      {/* Delete Modal */}
+      {/* Delete Project Modal */}
       {project && (
         <DeleteConfirmModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDelete}
+          onConfirm={handleDeleteProject}
           project={project}
         />
       )}
+
+      {/* Delete File Modal */}
+      <Modal
+        isOpen={Boolean(fileToDelete)}
+        onClose={() => setFileToDelete(null)}
+        title={FILE_MESSAGES.DELETE_CONFIRM_TITLE}
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-zinc-600">{FILE_MESSAGES.DELETE_CONFIRM_DESC}</p>
+          {fileToDelete && (
+            <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-lg">
+              <span className="text-xs text-zinc-400 block mb-0.5">File to delete</span>
+              <span className="text-sm font-semibold text-zinc-900">{fileToDelete.name}</span>
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-100">
+            <Button type="button" variant="secondary" onClick={() => setFileToDelete(null)}>
+              {PROJECT_MESSAGES.CANCEL_BUTTON}
+            </Button>
+            <Button type="button" variant="danger" onClick={handleDeleteFileConfirm}>
+              {FILE_MESSAGES.DELETE_CONFIRM_ACTION}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

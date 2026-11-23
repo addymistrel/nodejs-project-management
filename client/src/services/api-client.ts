@@ -4,6 +4,7 @@ import { clearAuthData, getAccessToken, getRefreshToken, setTokens } from '@/uti
 import type { ApiResponse, RefreshData } from '@/types';
 
 export const apiClient: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || undefined,
   headers: {
     [HTTP_HEADERS.CONTENT_TYPE]: HTTP_HEADERS.APPLICATION_JSON,
   },
