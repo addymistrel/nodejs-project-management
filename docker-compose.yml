@@ -1,0 +1,19 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      UPLOADS_DIR: /app/uploads
+    ports:
+      - '3000:3000'
+    volumes:
+      - backend_uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  backend_uploads:
