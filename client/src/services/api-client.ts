@@ -4,7 +4,6 @@ import { clearAuthData, getAccessToken, getRefreshToken, setTokens } from '@/uti
 import type { ApiResponse, RefreshData } from '@/types';
 
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || undefined,
   headers: {
     [HTTP_HEADERS.CONTENT_TYPE]: HTTP_HEADERS.APPLICATION_JSON,
   },
@@ -71,7 +70,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await axios.post<ApiResponse<RefreshData>>(
+        const response = await apiClient.post<ApiResponse<RefreshData>>(
           API_ENDPOINTS.AUTH.REFRESH,
           { refreshToken },
           { headers: { [HTTP_HEADERS.CONTENT_TYPE]: HTTP_HEADERS.APPLICATION_JSON } },

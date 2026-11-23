@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --ignore-scripts
+
+COPY . .
+
+ENV NODE_ENV=development
+ENV PORT=3000
+ENV UPLOADS_DIR=/app/uploads
+
+RUN mkdir -p /app/uploads
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

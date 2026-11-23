@@ -7,7 +7,7 @@
     "test": "vitest run tests",
     "test:coverage": "vitest run tests --coverage",
     "dev": "tsx watch --conditions=development src/server.ts",
-    "build": "tsc",
+    "build": "tsc && node scripts/fix-esm-imports.mjs",
     "start": "node dist/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -16,6 +16,7 @@
     "type-check": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
     "prepare": "husky",
     "db:migrate": "tsx src/database/migration-runner.ts up",
+    "db:migrate:prod": "node dist/database/migration-runner.js up",
     "db:migrate:undo": "tsx src/database/migration-runner.ts down",
     "db:migrate:undo:all": "tsx src/database/migration-runner.ts down:all",
     "db:migrate:user": "tsx src/database/migration-runner.ts up 004-create-users.ts"
@@ -29,71 +30,19 @@
   "license": "ISC",
   "type": "module",
   "imports": {
-    "#/config": {
-      "development": "./src/config/index.ts",
-      "types": "./src/config/index.ts",
-      "default": "./dist/config/index.js"
-    },
-    "#/constants": {
-      "development": "./src/constants/index.ts",
-      "types": "./src/constants/index.ts",
-      "default": "./dist/constants/index.js"
-    },
-    "#/database": {
-      "development": "./src/database/index.ts",
-      "types": "./src/database/index.ts",
-      "default": "./dist/database/index.js"
-    },
-    "#/types": {
-      "development": "./src/types/index.ts",
-      "types": "./src/types/index.ts",
-      "default": "./dist/types/index.js"
-    },
-    "#/utils": {
-      "development": "./src/utils/index.ts",
-      "types": "./src/utils/index.ts",
-      "default": "./dist/utils/index.js"
-    },
-    "#/middlewares": {
-      "development": "./src/middlewares/index.ts",
-      "types": "./src/middlewares/index.ts",
-      "default": "./dist/middlewares/index.js"
-    },
-    "#/validators": {
-      "development": "./src/validators/index.ts",
-      "types": "./src/validators/index.ts",
-      "default": "./dist/validators/index.js"
-    },
-    "#/repositories": {
-      "development": "./src/repositories/index.ts",
-      "types": "./src/repositories/index.ts",
-      "default": "./dist/repositories/index.js"
-    },
-    "#/services": {
-      "development": "./src/services/index.ts",
-      "types": "./src/services/index.ts",
-      "default": "./dist/services/index.js"
-    },
-    "#/controllers": {
-      "development": "./src/controllers/index.ts",
-      "types": "./src/controllers/index.ts",
-      "default": "./dist/controllers/index.js"
-    },
-    "#/routes": {
-      "development": "./src/routes/index.ts",
-      "types": "./src/routes/index.ts",
-      "default": "./dist/routes/index.js"
-    },
-    "#/docs": {
-      "development": "./src/docs/index.ts",
-      "types": "./src/docs/index.ts",
-      "default": "./dist/docs/index.js"
-    },
-    "#/*": {
-      "development": "./src/*",
-      "types": "./src/*",
-      "default": "./dist/*"
-    }
+    "#/config": "./dist/config/index.js",
+    "#/constants": "./dist/constants/index.js",
+    "#/database": "./dist/database/index.js",
+    "#/types": "./dist/types/index.js",
+    "#/utils": "./dist/utils/index.js",
+    "#/middlewares": "./dist/middlewares/index.js",
+    "#/validators": "./dist/validators/index.js",
+    "#/repositories": "./dist/repositories/index.js",
+    "#/services": "./dist/services/index.js",
+    "#/controllers": "./dist/controllers/index.js",
+    "#/routes": "./dist/routes/index.js",
+    "#/docs": "./dist/docs/index.js",
+    "#/*": "./dist/*"
   },
   "bugs": {
     "url": "https://github.com/addymistrel/nodejs-project-management/issues"
