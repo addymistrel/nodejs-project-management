@@ -11,6 +11,7 @@ export default defineConfig(
     ignores: [
       'node_modules/**',
       'dist/**',
+      'client/dist/**',
       'coverage/**',
       'uploads/**',
       'outputs/**',

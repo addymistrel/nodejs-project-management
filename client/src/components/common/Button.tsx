@@ -18,7 +18,8 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles = {
     primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 shadow-sm',
-    secondary: 'bg-zinc-100 text-zinc-900 hover:bg-zinc-200 focus:ring-zinc-400 border border-zinc-200',
+    secondary:
+      'bg-zinc-100 text-zinc-900 hover:bg-zinc-200 focus:ring-zinc-400 border border-zinc-200',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm',
   };
 
@@ -44,11 +45,7 @@ export const Button: React.FC<ButtonProps> = ({
               stroke="currentColor"
               strokeWidth="4"
             />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
           </svg>
           Loading...
         </span>

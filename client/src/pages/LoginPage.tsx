@@ -13,9 +13,7 @@ export const LoginPage: React.FC = () => {
         <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
           {AUTH_MESSAGES.LOGIN_TITLE}
         </h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          {AUTH_MESSAGES.LOGIN_SUBTITLE}
-        </p>
+        <p className="mt-1 text-sm text-zinc-500">{AUTH_MESSAGES.LOGIN_SUBTITLE}</p>
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
