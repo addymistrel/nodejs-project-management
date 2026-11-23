@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/context';
 import { AUTH_MESSAGES } from '@/constants';
-import { Button } from './Button';
+import { Button } from './button';
 
 export const Header: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();

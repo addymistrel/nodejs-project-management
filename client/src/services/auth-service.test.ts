@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth-service';
 import type { AxiosInstance } from 'axios';
 import { API_ENDPOINTS } from '@/constants';
 import type { AuthData, LoginCredentials, RefreshData, SignupCredentials } from '@/types';
