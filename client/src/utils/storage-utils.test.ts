@@ -6,7 +6,7 @@ import {
   getUser,
   clearAuthData,
   setTokens,
-} from './storage.utils';
+} from './storage-utils';
 import { STORAGE_KEYS } from '@/constants';
 import type { User } from '@/types';
 

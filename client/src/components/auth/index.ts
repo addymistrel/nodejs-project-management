@@ -1,3 +1,3 @@
-export * from './LoginForm';
-export * from './SignupForm';
-export * from './ProtectedRoute';
+export * from './login-form';
+export * from './signup-form';
+export * from './protected-route';

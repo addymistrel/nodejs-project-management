@@ -1,3 +1,4 @@
-export * from './LoginPage';
-export * from './SignupPage';
-export * from './DashboardPage';
+export * from './login-page';
+export * from './signup-page';
+export * from './dashboard-page';
+export * from './project-detail-page';

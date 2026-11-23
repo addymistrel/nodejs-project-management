@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { LoginForm } from './LoginForm';
+import { LoginForm } from './login-form';
 import { useAuth } from '@/context';
 import { AUTH_MESSAGES } from '@/constants';
 
